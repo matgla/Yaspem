@@ -3,14 +3,46 @@ function (initialize_packages)
     if (NOT Python3_FOUND)
         message (FATAL_ERROR "Can't find python3 executable")
     endif ()
-    execute_process(COMMAND ${Python3_EXECUTABLE} mspkg.py --cmake
+    message (STATUS "Initializing packages")
+    execute_process(COMMAND ${python_executable} mspkg.py -o ${CMAKE_CURRENT_BINARY_DIR} --cmake
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
 
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/packages/modules)
+endfunction()
+
+function (setup_virtualenv)
+    find_program(virtualenv_exec virtualenv)
+    if (NOT virtualenv_exec)
+        message (FATAL_ERROR, "Couldn't find virtualenv")
+    endif ()
+
+    file (GLOB virtualenv_file_stamp ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp)
+    if (NOT virtualenv_file_stamp)
+        message (STATUS "Configure virtualenv: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
+        execute_process(
+            COMMAND ${virtualenv_exec} -p python3 mspkg_venv
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+        execute_process(
+            COMMAND mspkg_venv/bin/pip install -r ${PROJECT_SOURCE_DIR}/requirements.txt --upgrade -q -q -q
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+
+        execute_process(
+            COMMAND cmake -E touch ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        )
+
+        set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/python3 CACHE INTERNAL "" FORCE)
+        file (GLOB virtualenv_file_stamp ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp)
+        message (STATUS "Virtualenv created, stamp file: ${virtualenv_file_stamp}")
+    endif ()
 endfunction ()
 
 function (setup_mspkg)
     message(STATUS "Setup of mspkg started")
+    setup_virtualenv()
     initialize_packages()
     set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/packages/cmake)
 endfunction ()

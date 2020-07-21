@@ -1,6 +1,6 @@
 #!/bin/python3
 
-# This file is part of MSModuleManager project. 
+# This file is part of MSModuleManager project.
 # Copyright (C) 2020 Mateusz Stadnik
 #
 # This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,8 @@ import argparse
 import json
 import subprocess
 import os
-from git import Repo 
+
+from git import Repo
 
 class bcolors:
     HEADER = '\033[95m'
@@ -58,47 +59,90 @@ def main():
     parser.add_argument("--cmake", dest="use_cmake", action="store_true", default="", help="prepare packages for cmake")
 
     args, rest = parser.parse_known_args()
-    
+
     input_file = "packages.json"
     output_directory = "packages"
     print("Dependencies list: ")
 
-    if args.input: 
-        input_file = args.input 
-    
+    if args.input:
+        input_file = args.input
+
     if args.output:
-        output_directory = args.output
+        output_directory = args.output + "/packages"
 
     with open(input_file, "r") as input_data:
         input_json = json.loads(input_data.read())
         current_path = os.path.dirname(os.path.abspath(__file__))
-        output_directory = current_path + "/" + output_directory
-        generate_directory = output_directory + "/" + "cmake_modules"
+        if not os.path.isabs(output_directory):
+            output_directory = current_path + "/" + output_directory
+        sources_directory = output_directory + "/" + "sources"
+        modules_directory = output_directory + "/" + "modules"
         if not os.path.exists(output_directory):
+            print ("Creating output directory: ", output_directory)
             os.makedirs(output_directory)
 
-        for package in input_json["dependencies"]:
-            print (" > " + package["name"]) 
+        if not os.path.exists(sources_directory):
+            print ("Creating sources directory: ", sources_directory)
+            os.makedirs(sources_directory)
 
-            package_directory = output_directory + "/" + package["directory"]
-            print ("package: ", package_directory)
+        if not os.path.exists(modules_directory):
+            print ("Creating modules directory: ", modules_directory)
+            os.makedirs(modules_directory)
+
+        for package in input_json["dependencies"]:
+            print (" > " + package["name"])
+
+            package_directory = sources_directory + "/" + package["directory"]
+            print ("directory: ", package_directory)
             if package["type"] == "git":
-                if not os.path.exists(package_directory):
-                    # Fetch directory
+
+                if os.path.exists(package_directory):
+                    repo = Repo(package_directory)
+                    print ("version: ", repo.git.describe())
+                else:
                     git_clone(package["link"], package_directory)
-                
-                repo = Repo(package_directory)
+
                 if not is_correct_tag(repo, package["version"]):
+                    repo = Repo(package_directory)
                     repo.git.checkout(package["version"])
                 print (repo.git.describe())
             else:
                 raise "Only git links are supported currently"
-            
+
             if args.use_cmake:
                 print ("Generate CMake target: ", package["target"])
-                if not os.path.exists(generate_directory):
-                    os.makedirs(generate_directory)
-                
+                target_path = modules_directory + "/Find" + package["target"] + ".cmake"
+                # if not os.path.exists(target_path):
+                with open(target_path, "w") as module:
+                    module.write("\
+###########################################################\n\
+#          THIS FILE WAS AUTOMATICALLY GENERATED          #\n\
+###########################################################\n\
+# This file is part of MSModuleManager project.\n\
+# Copyright (C) 2020 Mateusz Stadnik\n\
+#\n\
+# This program is free software: you can redistribute it and/or modify\n\
+# it under the terms of the GNU General Public License as published by\n\
+# the Free Software Foundation, either version 3 of the License, or\n\
+# (at your option) any later version.\n\
+#\n\
+# This program is distributed in the hope that it will be useful,\n\
+# but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n\
+# GNU General Public License for more details.\n\
+#\n\
+# You should have received a copy of the GNU General Public License\n\
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.\n\
+")
+                    module.write("if (NOT TARGET " + package["target"] + ")\n")
+                    if "cmake_variables" in package["options"]:
+                        for variable in package["options"]["cmake_variables"]:
+                            module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
+                    module.write("    add_subdirectory(" + package_directory + ")\n")
+                    module.write("endif ()\n")
+
+
+
     # if (args)
 
 main()
