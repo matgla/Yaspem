@@ -1,16 +1,16 @@
-function (initialize_packages working_directory)
+function (initialize_packages source_directory)
     find_package (Python3 COMPONENTS Interpreter)
     if (NOT Python3_FOUND)
         message (FATAL_ERROR "Can't find python3 executable")
     endif ()
     message (STATUS "Initializing packages")
     execute_process(COMMAND ${python_executable} mspkg.py -o ${CMAKE_CURRENT_BINARY_DIR} --cmake
-        WORKING_DIRECTORY ${working_directory})
+        WORKING_DIRECTORY ${source_directory})
 
     set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/packages/modules)
 endfunction()
 
-function (setup_virtualenv)
+function (setup_virtualenv source_directory)
     find_program(virtualenv_exec virtualenv)
     if (NOT virtualenv_exec)
         message (FATAL_ERROR, "Couldn't find virtualenv")
@@ -24,7 +24,7 @@ function (setup_virtualenv)
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
         execute_process(
-            COMMAND mspkg_venv/bin/pip install -r ${PROJECT_SOURCE_DIR}/requirements.txt --upgrade -q -q -q
+            COMMAND mspkg_venv/bin/pip install -r ${source_directory}/requirements.txt --upgrade -q -q -q
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
 
@@ -39,9 +39,9 @@ function (setup_virtualenv)
     endif ()
 endfunction ()
 
-function (setup_mspkg working_directory)
+function (setup_mspkg source_directory)
     message(STATUS "Setup of mspkg started")
-    setup_virtualenv()
-    initialize_packages(${working_directory})
+    setup_virtualenv(${source_directory})
+    initialize_packages(${source_directory})
     set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/packages/cmake)
 endfunction ()
