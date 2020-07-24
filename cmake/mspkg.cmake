@@ -12,7 +12,7 @@ function (initialize_packages)
     set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/packages/modules PARENT_SCOPE)
 endfunction()
 
-function (setup_virtualenv)
+function (setup_virtualenv source_directory)
     find_program(virtualenv_exec virtualenv)
     if (NOT virtualenv_exec)
         message (FATAL_ERROR, "Couldn't find virtualenv")
@@ -26,7 +26,7 @@ function (setup_virtualenv)
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
         execute_process(
-            COMMAND mspkg_venv/bin/pip install -r ${PROJECT_SOURCE_DIR}/requirements.txt --upgrade -q -q -q
+            COMMAND mspkg_venv/bin/pip install -r ${source_directory}/requirements.txt --upgrade -q -q -q
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
 
@@ -41,9 +41,9 @@ function (setup_virtualenv)
     endif ()
 endfunction ()
 
-function (setup_mspkg)
+function (setup_mspkg source_directory)
     message(STATUS "Setup of mspkg started")
-    setup_virtualenv()
+    setup_virtualenv(${source_directory})
     initialize_packages()
     set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/packages/cmake PARENT_SCOPE)
 endfunction ()
