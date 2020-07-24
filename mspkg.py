@@ -70,6 +70,17 @@ def main():
     if args.output:
         output_directory = args.output + "/packages"
 
+    cache_file = args.output + "/cache.json"
+    cache = {}
+    if os.path.exists(cache_file):
+        with open(cache_file, "r") as file:
+            cache = json.loads(file.read())
+
+    if not "timestamps" in cache:
+        cache["timestamps"] = {}
+    if not "package_file" in cache["timestamps"]:
+        cache["timestamps"]["package_file"] = os.path.getmtime(input_file)
+
     with open(input_file, "r") as input_data:
         input_json = json.loads(input_data.read())
         current_path = os.path.dirname(os.path.abspath(__file__))
@@ -102,8 +113,8 @@ def main():
                 else:
                     git_clone(package["link"], package_directory)
 
+                repo = Repo(package_directory)
                 if not is_correct_tag(repo, package["version"]):
-                    repo = Repo(package_directory)
                     repo.git.checkout(package["version"])
                 print (repo.git.describe())
             else:
@@ -144,5 +155,7 @@ def main():
 
 
     # if (args)
+            with open(cache_file, "w") as file:
+                file.write(json.dumps(cache))
 
 main()

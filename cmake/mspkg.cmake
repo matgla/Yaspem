@@ -1,16 +1,18 @@
-function (initialize_packages source_directory)
+function (initialize_packages)
     find_package (Python3 COMPONENTS Interpreter)
     if (NOT Python3_FOUND)
         message (FATAL_ERROR "Can't find python3 executable")
     endif ()
     message (STATUS "Initializing packages")
-    execute_process(COMMAND ${python_executable} mspkg.py -o ${CMAKE_CURRENT_BINARY_DIR} --cmake
-        WORKING_DIRECTORY ${source_directory})
+    file(GLOB_RECURSE mspkg_executable mspkg.py)
+    execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${CMAKE_CURRENT_BINARY_DIR} --cmake
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
 
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/packages/modules)
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/packages/modules PARENT_SCOPE)
 endfunction()
 
-function (setup_virtualenv source_directory)
+function (setup_virtualenv)
     find_program(virtualenv_exec virtualenv)
     if (NOT virtualenv_exec)
         message (FATAL_ERROR, "Couldn't find virtualenv")
@@ -24,7 +26,7 @@ function (setup_virtualenv source_directory)
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
         execute_process(
-            COMMAND mspkg_venv/bin/pip install -r ${source_directory}/requirements.txt --upgrade -q -q -q
+            COMMAND mspkg_venv/bin/pip install -r ${PROJECT_SOURCE_DIR}/requirements.txt --upgrade -q -q -q
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )
 
@@ -39,9 +41,9 @@ function (setup_virtualenv source_directory)
     endif ()
 endfunction ()
 
-function (setup_mspkg source_directory)
+function (setup_mspkg)
     message(STATUS "Setup of mspkg started")
-    setup_virtualenv(${source_directory})
-    initialize_packages(${source_directory})
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/packages/cmake)
+    setup_virtualenv()
+    initialize_packages()
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/packages/cmake PARENT_SCOPE)
 endfunction ()
