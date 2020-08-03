@@ -41,6 +41,11 @@ def is_correct_tag(repo, required_tag):
         if tag.commit == repo.head.commit:
             if str(tag) == required_tag:
                 return True
+        try:
+            if tag == repo.active_branch.name:
+                return True
+        except TypeError:
+            pass
     return False
 
 def main():
@@ -109,21 +114,18 @@ def main():
 
                 if os.path.exists(package_directory):
                     repo = Repo(package_directory)
-                    print ("version: ", repo.git.describe())
                 else:
                     git_clone(package["link"], package_directory)
 
                 repo = Repo(package_directory)
                 if not is_correct_tag(repo, package["version"]):
                     repo.git.checkout(package["version"])
-                print (repo.git.describe())
             else:
                 raise "Only git links are supported currently"
 
             if args.use_cmake:
                 print ("Generate CMake target: ", package["target"])
                 target_path = modules_directory + "/Find" + package["target"] + ".cmake"
-                # if not os.path.exists(target_path):
                 with open(target_path, "w") as module:
                     module.write("\
 ###########################################################\n\
