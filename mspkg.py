@@ -106,7 +106,7 @@ def main():
             os.makedirs(modules_directory)
 
         for package in input_json["dependencies"]:
-            print (" > " + package["name"])
+            print (" > " + package["target"])
 
             package_directory = sources_directory + "/" + package["directory"]
             print ("directory: ", package_directory)
@@ -147,11 +147,15 @@ def main():
 # You should have received a copy of the GNU General Public License\n\
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.\n\
 ")
+                    if "is_cmake_library" in package["options"]:
+                        if package["options"]["is_cmake_library"]:
+                            module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} " + package_directory + ")")
+                            continue
                     module.write("if (NOT TARGET " + package["target"] + ")\n")
                     if "cmake_variables" in package["options"]:
                         for variable in package["options"]["cmake_variables"]:
                             module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
-                    module.write("    add_subdirectory(" + package_directory + ")\n")
+                    module.write("    add_subdirectory(" + package_directory + " build)\n")
                     module.write("endif ()\n")
 
 

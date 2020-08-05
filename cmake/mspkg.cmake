@@ -3,8 +3,13 @@ function (initialize_packages)
     if (NOT Python3_FOUND)
         message (FATAL_ERROR "Can't find python3 executable")
     endif ()
-    message (STATUS "Initializing packages")
-    file(GLOB_RECURSE mspkg_executable mspkg.py)
+    message (STATUS "Initializing packages: ${PROJECT_BINARY_DIR}")
+    if (NOT mspkg_executable)
+        file(GLOB_RECURSE mspkg_executable mspkg.py WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+        set (mspkg_executable "${mspkg_executable}" CACHE INTERNAL "")
+    endif()
+
+    message (STATUS "Command: ${python_executable} ${mspkg_executable} -o ${CMAKE_CURRENT_BINARY_DIR} --cmake")
     execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${CMAKE_CURRENT_BINARY_DIR} --cmake
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
