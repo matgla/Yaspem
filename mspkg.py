@@ -155,7 +155,9 @@ def main():
                     if "cmake_variables" in package["options"]:
                         for variable in package["options"]["cmake_variables"]:
                             module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
-                    module.write("    add_subdirectory(" + package_directory + " build)\n")
+                    if not "include" in package["options"] or package["options"]["include"]:
+                        module.write("    add_subdirectory(" + package_directory + " build)\n")
+
                     module.write("endif ()\n")
 
 
