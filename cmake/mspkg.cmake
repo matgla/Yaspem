@@ -9,12 +9,12 @@ function (initialize_packages)
         set (mspkg_executable "${mspkg_SOURCE_DIR}/mspkg.py" CACHE INTERNAL "")
     endif()
 
-    message (STATUS "Command: ${python_executable} ${mspkg_executable} -o ${CMAKE_CURRENT_BINARY_DIR} --cmake")
-    execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${CMAKE_CURRENT_BINARY_DIR} --cmake
+    message (STATUS "Command: ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} --cmake")
+    execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} --cmake
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
 
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/packages/modules PARENT_SCOPE)
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${mspkg_SOURCE_DIR}/packages/modules PARENT_SCOPE)
 endfunction()
 
 function (setup_virtualenv source_directory)
