@@ -62,7 +62,7 @@ def main():
     parser.add_argument("add", action="store_true", help="interactive menu to add package")
     parser.add_argument("remove", nargs="?", action="store", default="", help="remove package with name")
     parser.add_argument("--cmake", dest="use_cmake", action="store_true", default="", help="prepare packages for cmake")
-
+    parser.add_argument("-b", dest="binary_dir", action="store", default="", help="binary directory")
     args, rest = parser.parse_known_args()
 
     input_file = "packages.json"
@@ -156,7 +156,7 @@ def main():
                         for variable in package["options"]["cmake_variables"]:
                             module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
                     if not "include" in package["options"] or package["options"]["include"]:
-                        module.write("    add_subdirectory(" + package_directory + " build)\n")
+                        module.write("    add_subdirectory(" + package_directory + " " + args.binary_dir + "/" + package["target"] + ")\n")
 
                     module.write("endif ()\n")
 

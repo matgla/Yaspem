@@ -10,7 +10,7 @@ function (initialize_packages)
     endif()
 
     message (STATUS "Command: ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} --cmake")
-    execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} --cmake
+    execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} -b ${mspkg_BINARY_DIR} --cmake
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
 
