@@ -14,7 +14,6 @@ function (initialize_packages)
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
 
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${mspkg_SOURCE_DIR}/packages/modules PARENT_SCOPE)
 endfunction()
 
 function (setup_virtualenv source_directory)
@@ -50,5 +49,6 @@ function (setup_mspkg source_directory)
     message(STATUS "Setup of mspkg started")
     setup_virtualenv(${source_directory})
     initialize_packages()
-    # set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/packages/cmake PARENT_SCOPE)
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${mspkg_SOURCE_DIR}/packages/modules)
+
 endfunction ()
