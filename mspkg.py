@@ -152,6 +152,25 @@ def main():
                             module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} " + package_directory + ")")
                             continue
                     module.write("if (NOT TARGET " + package["target"] + ")\n")
+                    if "create_library" in package["options"]:
+                        sources_search = ""
+                        library_type = package["options"]["create_library"]["type"]
+                        for keyword in package["options"]["create_library"]["sources_filter"]:
+                            sources_search += " " + package_directory + "/" + package["options"]["create_library"]["sources_directory"] + "/" + keyword
+                        module.write("    file(GLOB_RECURSE SRCS " + sources_search + ")\n")
+                        module.write("    message(\"SOURCES: ${SRCS}\")\n")
+                        module.write("    add_library(" + package["target"] + " " + library_type + " ${SRCS})\n")
+                        include_type = ""
+                        if library_type == "STATIC":
+                            include_type = "PUBLIC"
+                        include_paths = ""
+                        for directory in package["options"]["create_library"]["include_directories"]:
+                            include_paths += " " + package_directory + "/" + directory
+                        module.write("    target_include_directories(" + package["target"] + " " + include_type + " " + include_paths + ")\n")
+                        if "compile_definitions" in package["options"]["create_library"]:
+                            module.write("    target_compile_definitions(" + package["target"] + " " + include_type + " " + package["options"]["create_library"]["compile_definitions"] + ")\n")
+                        module.write("endif ()\n");
+                        continue
                     if "cmake_variables" in package["options"]:
                         for variable in package["options"]["cmake_variables"]:
                             module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
