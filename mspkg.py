@@ -158,7 +158,8 @@ def main():
                         for keyword in package["options"]["create_library"]["sources_filter"]:
                             sources_search += " " + package_directory + "/" + package["options"]["create_library"]["sources_directory"] + "/" + keyword
                         module.write("    file(GLOB_RECURSE SRCS " + sources_search + ")\n")
-                        module.write("    message(\"SOURCES: ${SRCS}\")\n")
+                        module.write("    message(STATUS \"" + package["target"] + " sources: ${SRCS}\")\n")
+                        module.write("    set (" + package["target"] + "_sources ${SRCS})\n")
                         module.write("    add_library(" + package["target"] + " " + library_type + " ${SRCS})\n")
                         include_type = ""
                         if library_type == "STATIC":
@@ -166,7 +167,8 @@ def main():
                         include_paths = ""
                         for directory in package["options"]["create_library"]["include_directories"]:
                             include_paths += " " + package_directory + "/" + directory
-                        module.write("    target_include_directories(" + package["target"] + " " + include_type + " " + include_paths + ")\n")
+                        if len(include_paths):
+                            module.write("    target_include_directories(" + package["target"] + " " + include_type + " " + include_paths + ")\n")
                         if "compile_definitions" in package["options"]["create_library"]:
                             module.write("    target_compile_definitions(" + package["target"] + " " + include_type + " " + package["options"]["create_library"]["compile_definitions"] + ")\n")
                         module.write("endif ()\n");
