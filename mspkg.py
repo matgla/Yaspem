@@ -48,6 +48,11 @@ def is_correct_tag(repo, required_tag):
             pass
     return False
 
+def submodules_update_required(package):
+    if "options" in package:
+        if "update_submodules" in package["options"]:
+            return package["options"]["update_submodules"]
+
 def main():
     print(bcolors.HEADER + "Package manager" + bcolors.ENDC)
 
@@ -118,8 +123,16 @@ def main():
                     git_clone(package["link"], package_directory)
 
                 repo = Repo(package_directory)
+
+                if submodules_update_required(package):
+                    print ("Submodules update")
+                    for submodule in repo.submodules:
+                        print (" > " + str(submodule))
+                        submodule.update(init=True)
+
                 if not is_correct_tag(repo, package["version"]):
                     repo.git.checkout(package["version"])
+
             else:
                 raise "Only git links are supported currently"
 
