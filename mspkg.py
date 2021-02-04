@@ -132,7 +132,7 @@ def main():
                             print (" > " + str(submodule))
                             submodule.update(init=True)
                     except configparser.NoOptionError:
-                        pass
+                        continue
 
                 if not is_correct_tag(repo, package["version"]):
                     repo.git.checkout(package["version"])
