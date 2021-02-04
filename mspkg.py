@@ -127,7 +127,7 @@ def main():
                 if submodules_update_required(package):
                     print ("Submodules update")
                     for submodule in repo.submodules:
-                        if repo.submodules[submodule].path is not None:
+                        if hasattr(repo.submodules[submodule], "path"):
                             print (" > " + str(submodule))
                             submodule.update(init=True)
 
