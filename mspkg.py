@@ -54,15 +54,6 @@ def submodules_update_required(package):
         if "update_submodules" in package["options"]:
             return package["options"]["update_submodules"]
 
-def update_submodules_iter(gen):
-    while True:
-        try:
-            yield next(gen)
-        except StopIteration:
-            break
-        except configparser.NoOptionError:
-            continue
-
 def main():
     print(bcolors.HEADER + "Package manager" + bcolors.ENDC)
 
@@ -136,10 +127,12 @@ def main():
 
                 if submodules_update_required(package):
                     print ("Submodules update")
-                    for submodule in update_submodules_iter(iter(repo.submodules)):
-                        print (" > " + str(submodule))
-                        submodule.update(init=True)
-
+                    try:
+                        for submodule in repo.submodules:
+                            print (" > " + str(submodule))
+                            submodule.update(init=True)
+                    except configparser.NoOptionError:
+                        print ("Can't update submodules, invalid entry")
                 if not is_correct_tag(repo, package["version"]):
                     repo.git.checkout(package["version"])
 
