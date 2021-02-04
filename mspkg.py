@@ -127,8 +127,9 @@ def main():
                 if submodules_update_required(package):
                     print ("Submodules update")
                     for submodule in repo.submodules:
-                        print (" > " + str(submodule))
-                        submodule.update(init=True)
+                        if repo.submodules[submodule].path is not None:
+                            print (" > " + str(submodule))
+                            submodule.update(init=True)
 
                 if not is_correct_tag(repo, package["version"]):
                     repo.git.checkout(package["version"])
@@ -145,7 +146,7 @@ def main():
 #          THIS FILE WAS AUTOMATICALLY GENERATED          #\n\
 ###########################################################\n\
 # This file is part of MSModuleManager project.\n\
-# Copyright (C) 2020 Mateusz Stadnik\n\
+# Copyright (C) 2021 Mateusz Stadnik\n\
 #\n\
 # This program is free software: you can redistribute it and/or modify\n\
 # it under the terms of the GNU General Public License as published by\n\
