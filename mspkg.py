@@ -127,13 +127,12 @@ def main():
 
                 if submodules_update_required(package):
                     print ("Submodules update")
-                    for submodule in repo.submodules:
-                        try:
-                            if submodule.path is not None:
-                                print (" > " + str(submodule))
-                                submodule.update(init=True)
-                        except configparser.NoOptionError:
-                            pass
+                    try:
+                        for submodule in repo.submodules:
+                            print (" > " + str(submodule))
+                            submodule.update(init=True)
+                    except configparser.NoOptionError:
+                        pass
 
                 if not is_correct_tag(repo, package["version"]):
                     repo.git.checkout(package["version"])
