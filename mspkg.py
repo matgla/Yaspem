@@ -22,6 +22,7 @@ import subprocess
 import os
 
 from git import Repo
+import configparser
 
 class bcolors:
     HEADER = '\033[95m'
@@ -127,9 +128,12 @@ def main():
                 if submodules_update_required(package):
                     print ("Submodules update")
                     for submodule in repo.submodules:
-                        if submodule.path is not None:
-                            print (" > " + str(submodule))
-                            submodule.update(init=True)
+                        try:
+                            if submodule.path is not None:
+                                print (" > " + str(submodule))
+                                submodule.update(init=True)
+                        except configparser.NoOptionError:
+                            pass
 
                 if not is_correct_tag(repo, package["version"]):
                     repo.git.checkout(package["version"])
