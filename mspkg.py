@@ -136,7 +136,7 @@ def main():
 
                 if submodules_update_required(package):
                     print ("Submodules update")
-                    for submodule in update_submodules_iter(repo.submodules):
+                    for submodule in update_submodules_iter(repo.submodules.iter()):
                         print (" > " + str(submodule))
                         submodule.update(init=True)
 
