@@ -170,11 +170,11 @@ def main():
                     package_source_variable = package["target"] + "_SOURCE_DIR"
                     if "is_cmake_library" in package["options"]:
                         if package["options"]["is_cmake_library"]:
-                            module.write("set (" + package_source_variable + " \"" + package_directory  + "\"\n")
+                            module.write("set (" + package_source_variable + " \"" + package_directory  + "\")\n")
                             module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"" + package_directory + "\")")
                             continue
                     module.write("if (NOT TARGET " + package["target"] + ")\n")
-                    module.write("    set (" + package_source_variable + " \"" + package_directory  + "\"\n")
+                    module.write("    set (" + package_source_variable + " \"" + package_directory  + "\")\n")
                     if "create_library" in package["options"]:
                         sources_search = ""
                         library_type = package["options"]["create_library"]["type"]
