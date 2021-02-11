@@ -114,7 +114,11 @@ def main():
         for package in input_json["dependencies"]:
             print (" > " + package["target"])
 
-            package_directory = sources_directory + "/" + package["directory"]
+            if not "directory" in package:
+                directory_suffix = package["target"]
+            else:
+                directory_suffix = package["directory"]
+            package_directory = sources_directory + "/" + directory_suffix
             print ("directory: ", package_directory)
             if package["type"] == "git":
 

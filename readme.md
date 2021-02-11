@@ -130,7 +130,7 @@ Structure for ```create_library```
     "compile_definitions": ["-DFLAG=1"]
 }
 ```
-Path in include_directories and source_filter/directory has root in ````${mspkg_SOURCE_DIR}/packages/sources/<package>```
+Path in include_directories and source_filter/directory has root in ```${mspkg_SOURCE_DIR}/packages/sources/<package>```
 
 # How this is working 
 
@@ -153,5 +153,5 @@ setup_mspkg(<path to mspkg sources>)
 
 # Features to be implemented: 
 
-- [] Add argument to specify path for packages 
+- [ ] Add argument to specify path for packages 
 
