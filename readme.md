@@ -115,6 +115,11 @@ Parameters:
 **Optional**
 ``` 
 <directory>: directory to fetch package 
+<cmake_variables>: array of variables to be setup in module, i.e 
+"cmake_variables": {
+    "variable_1": "value_1",
+    "variable_2": "value_2"
+}
 ```
 
 **Options** 
@@ -147,8 +152,15 @@ With default options ```mspkg``` expects that provided repository has CMake pack
 
 # API 
 
+Functions exported by mspkg.cmake 
+
 ```cmake
 setup_mspkg(<path to mspkg sources>)
+```
+
+Variables exported by module: 
+```cmake 
+${package_name_SOURCE_DIR}: directory to package sources
 ```
 
 # Features to be implemented: 
