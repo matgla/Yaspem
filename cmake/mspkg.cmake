@@ -12,6 +12,7 @@ function (initialize_packages)
     message (STATUS "Command: ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} --cmake")
     execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} -b ${mspkg_BINARY_DIR} --cmake
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMAND_ERROR_IS_FATAL ANY
     )
 
 endfunction()
@@ -28,15 +29,18 @@ function (setup_virtualenv source_directory)
         execute_process(
             COMMAND ${virtualenv_exec} -p python3 mspkg_venv
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMAND_ERROR_IS_FATAL ANY
         )
         execute_process(
             COMMAND mspkg_venv/bin/pip install -r ${source_directory}/requirements.txt --upgrade -q -q -q
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMAND_ERROR_IS_FATAL ANY
         )
 
         execute_process(
             COMMAND cmake -E touch ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMAND_ERROR_IS_FATAL ANY
         )
 
         set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/python3 CACHE INTERNAL "" FORCE)
