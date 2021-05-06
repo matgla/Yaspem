@@ -31,8 +31,17 @@ function (setup_virtualenv source_directory)
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMAND_ERROR_IS_FATAL ANY
         )
+
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/pip)
+            set (mspkg_pip ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/pip)
+        else if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
+            set (mspkg_pip ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
+        else () 
+            message (FATAL_ERROR "Can't find pip executable under: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
+        else ()
+
         execute_process(
-            COMMAND mspkg_venv/bin/pip install -r ${source_directory}/requirements.txt --upgrade -q -q -q
+            COMMAND ${mspkg_pip} install -r ${source_directory}/requirements.txt --upgrade -q -q -q
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMAND_ERROR_IS_FATAL ANY
         )
@@ -43,7 +52,15 @@ function (setup_virtualenv source_directory)
             COMMAND_ERROR_IS_FATAL ANY
         )
 
-        set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/python3 CACHE INTERNAL "" FORCE)
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/python3)
+            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/python3 CACHE INTERNAL "" FORCE)
+            else if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/python) 
+            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/python CACHE INTERNAL "" FORCE)
+        else () 
+            message (FATAL_ERROR "Can't find python 3 executable under: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
+        else ()
+
+
         file (GLOB virtualenv_file_stamp ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp)
         message (STATUS "Virtualenv created, stamp file: ${virtualenv_file_stamp}")
     endif ()
