@@ -34,7 +34,7 @@ function (setup_virtualenv source_directory)
 
         if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/pip)
             set (mspkg_pip ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/pip)
-        else if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
+        elseif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
             set (mspkg_pip ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
         else () 
             message (FATAL_ERROR "Can't find pip executable under: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
