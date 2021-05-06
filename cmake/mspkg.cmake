@@ -38,7 +38,7 @@ function (setup_virtualenv source_directory)
             set (mspkg_pip ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
         else () 
             message (FATAL_ERROR "Can't find pip executable under: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
-        else ()
+        endif ()
 
         execute_process(
             COMMAND ${mspkg_pip} install -r ${source_directory}/requirements.txt --upgrade -q -q -q
