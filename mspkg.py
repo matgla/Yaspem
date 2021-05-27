@@ -21,6 +21,8 @@ import json
 import subprocess
 import os
 
+from pathlib import Path
+
 from git import Repo
 import configparser
 
@@ -92,6 +94,11 @@ def main():
     if not "package_file" in cache["timestamps"]:
         cache["timestamps"]["package_file"] = os.path.getmtime(input_file)
 
+    priority = len(Path(os.getcwd()).parts)
+    print("Priority: ", priority) 
+    if not "priorities" in cache: 
+        cache["priorities"] = {} 
+
     with open(input_file, "r") as input_data:
         input_json = json.loads(input_data.read())
         current_path = os.path.dirname(os.path.abspath(__file__))
@@ -99,9 +106,11 @@ def main():
             output_directory = current_path + "/" + output_directory
         sources_directory = output_directory + "/" + "sources"
         modules_directory = output_directory + "/" + "modules"
+        
         if not os.path.exists(output_directory):
             print ("Creating output directory: ", output_directory)
             os.makedirs(output_directory)
+
 
         if not os.path.exists(sources_directory):
             print ("Creating sources directory: ", sources_directory)
@@ -112,6 +121,13 @@ def main():
             os.makedirs(modules_directory)
 
         for package in input_json["dependencies"]:
+            if not package["target"] in cache["priorities"]:
+                cache["priorities"][package["target"]] = priority 
+
+            elif priority > cache["priorities"][package["target"]]:
+                print (" > " + package["target"] + " was fetched by parent packages.json")
+                break
+
             print (" > " + package["target"])
 
             if not "directory" in package:
@@ -127,8 +143,9 @@ def main():
                 else:
                     git_clone(package["link"], package_directory)
 
-                repo = Repo(package_directory)
 
+                repo = Repo(package_directory)
+                
                 if submodules_update_required(package):
                     print ("Submodules update")
                     try:
@@ -138,7 +155,14 @@ def main():
                     except configparser.NoOptionError:
                         print ("Can't update submodules, invalid entry")
                 if not is_correct_tag(repo, package["version"]):
+                    print("Checkout version: ", package["version"])
                     repo.git.checkout(package["version"])
+                
+                update_request = os.environ.get("UPDATE_PACKAGES")
+
+                if update_request != None and update_request == "1":
+                    repo.git.fetch()     
+                
 
             else:
                 raise "Only git links are supported currently"
