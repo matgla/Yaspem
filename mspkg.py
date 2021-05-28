@@ -159,10 +159,13 @@ def main():
                     repo.git.checkout(package["version"])
                 
                 update_request = os.environ.get("UPDATE_PACKAGES")
-
                 if update_request != None and update_request == "1":
-                    repo.git.fetch()     
-                
+                    print ("Update package: ", package["target"])
+                    repo.git.fetch()    
+                    all_branches = repo.git.branch("--all").split()
+                    if package["version"] in all_branches:
+                        repo.git.rebase()
+
 
             else:
                 raise "Only git links are supported currently"
