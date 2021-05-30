@@ -214,6 +214,8 @@ def main():
                         include_type = ""
                         if library_type == "STATIC":
                             include_type = "PUBLIC"
+                        elif library_type == "INTERFACE":
+                            include_type = "INTERFACE"
                         include_paths = ""
                         for directory in package["options"]["create_library"]["include_directories"]:
                             include_paths += " " + package_directory + "/" + directory
