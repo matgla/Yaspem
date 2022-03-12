@@ -126,7 +126,7 @@ def main():
 
             elif priority > cache["priorities"][package["target"]]:
                 print (" > " + package["target"] + " was fetched by parent packages.json")
-                break
+                continue 
 
             print (" > " + package["target"])
 
