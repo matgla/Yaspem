@@ -131,7 +131,7 @@ Structure for ```create_library```
     "type": "[STATIC]",
     "sources_filter": ["*.cpp", "..."],
     "include_directories": ["include"],
-    "source_directory": "<path_to_source>"
+    "sources_directory": "<path_to_source>"
     "compile_definitions": ["-DFLAG=1"]
 }
 ```
