@@ -1,6 +1,6 @@
-# MS PKG 
+# Yaspem - Yet Another Simple PackagE Manager
 
-The mspkg provides tool to manage dependencies within CMake. 
+The yaspem is tool to manage dependencies within CMake. 
 It allows to fetch sources automatically with specific version.
 Also creates wrapping files to find packages with find_package command. 
 
