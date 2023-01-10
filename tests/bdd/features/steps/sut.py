@@ -17,8 +17,10 @@ def file_expectation_msg(expectation, content):
         + content + "\n---------------------------\n"
 
 def execute_sut(args = []):
-    yaspem_path = pathlib.Path(__file__).parent.parent.parent.parent.parent.resolve() / "yaspem.py"
-    args_to_run = [yaspem_path]
+    root_dir = pathlib.Path(__file__).parent.parent.parent.parent.parent.resolve()
+    python_path = root_dir / "test_env" / "bin" / "python3"
+    yaspem_path = root_dir / "yaspem.py"
+    args_to_run = [python_path, yaspem_path]
     args_to_run.extend(args)
     return run(args_to_run, capture_output=True, cwd=working_dir)
 
