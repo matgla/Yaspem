@@ -1,7 +1,7 @@
 #!/bin/python3
 
-# This file is part of MSModuleManager project.
-# Copyright (C) 2020 Mateusz Stadnik
+# This file is part of YASPEM project.
+# Copyright (C) 2023 Mateusz Stadnik
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import argparse
 import json
 import subprocess
 import os
+import sys
 
 from pathlib import Path
 
@@ -61,14 +62,7 @@ def main():
 
     parser = argparse.ArgumentParser(description = "Package manager for CMake projects")
     parser.add_argument("-i", "--input", dest="input", action="store", help="JSON file with dependencies (default: packages.json)")
-    parser.add_argument("-o", "--output", dest="output", action="store", help="directory where modules will be installed (default: packages)")
-    parser.add_argument("setup", action="store_true", help="configure project")
-    parser.add_argument("install", action="store_true", help="install dependencies")
-    parser.add_argument("update", action="store_true", help="update dependencies")
-    parser.add_argument("clean", action="store_true", help="remove build and cache files")
-    parser.add_argument("--prune", dest="prune", action="store_true", help="flag to clean command which also removes sources")
-    parser.add_argument("add", action="store_true", help="interactive menu to add package")
-    parser.add_argument("remove", nargs="?", action="store", default="", help="remove package with name")
+    parser.add_argument("-o", "--output", dest="output", action="store", help="directory where modules will be installed", required=True)
     parser.add_argument("--cmake", dest="use_cmake", action="store_true", default="", help="prepare packages for cmake")
     parser.add_argument("-b", dest="binary_dir", action="store", default="", help="binary directory")
     args, rest = parser.parse_known_args()
@@ -78,9 +72,14 @@ def main():
     print("Dependencies list: ")
 
     if args.input:
-        input_file = args.input
+        input_file = args.input.strip()
+
+    if not os.path.exists(input_file):
+        print("error: input file '" + input_file + "' not found", file=sys.stderr)
+        sys.exit(1)
 
     if args.output:
+        args.output = args.output.strip()
         output_directory = args.output + "/packages"
 
     cache_file = args.output + "/cache.json"
@@ -95,9 +94,9 @@ def main():
         cache["timestamps"]["package_file"] = os.path.getmtime(input_file)
 
     priority = len(Path(os.getcwd()).parts)
-    print("Priority: ", priority) 
-    if not "priorities" in cache: 
-        cache["priorities"] = {} 
+    print("Priority: ", priority)
+    if not "priorities" in cache:
+        cache["priorities"] = {}
 
     with open(input_file, "r") as input_data:
         input_json = json.loads(input_data.read())
@@ -106,7 +105,7 @@ def main():
             output_directory = current_path + "/" + output_directory
         sources_directory = output_directory + "/" + "sources"
         modules_directory = output_directory + "/" + "modules"
-        
+
         if not os.path.exists(output_directory):
             print ("Creating output directory: ", output_directory)
             os.makedirs(output_directory)
@@ -122,11 +121,11 @@ def main():
 
         for package in input_json["dependencies"]:
             if not package["target"] in cache["priorities"]:
-                cache["priorities"][package["target"]] = priority 
+                cache["priorities"][package["target"]] = priority
 
             elif priority > cache["priorities"][package["target"]]:
                 print (" > " + package["target"] + " was fetched by parent packages.json")
-                continue 
+                continue
 
             print (" > " + package["target"])
 
@@ -145,7 +144,7 @@ def main():
 
 
                 repo = Repo(package_directory)
-                
+
                 if submodules_update_required(package):
                     print ("Submodules update")
                     try:
@@ -157,11 +156,11 @@ def main():
                 if not is_correct_tag(repo, package["version"]):
                     print("Checkout version: ", package["version"])
                     repo.git.checkout(package["version"])
-                
+
                 update_request = os.environ.get("UPDATE_PACKAGES")
                 if update_request != None and update_request == "1":
                     print ("Update package: ", package["target"])
-                    repo.git.fetch()    
+                    repo.git.fetch()
                     all_branches = repo.git.branch("--all").split()
                     if package["version"] in all_branches:
                         repo.git.rebase()
@@ -230,7 +229,7 @@ def main():
                             module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
                     if not "include" in package["options"] or package["options"]["include"]:
                         module.write("    add_subdirectory(" + package_directory + " " + args.binary_dir + "/" + package["target"] + ")\n")
-                   
+
                     module.write("    if (NOT TARGET " + package["target"] + ")\n")
                     module.write("        add_library(" + package["target"] + " INTERFACE)\n")
                     module.write("    endif()\n")
