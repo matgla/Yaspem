@@ -2,7 +2,7 @@
 
 case "$(uname -sr)" in
     CYGWIN*|MINGW*|MINGW32*|MSYS*)
-        pip_exec=test_env/bin/pip3.exe;;
+        pip_exec=test_env/Scripts/pip3.exe;;
     *)
         pip_exec=test_env/bin/pip3;;
 esac
@@ -41,6 +41,6 @@ echo "-- Prepare virtual env"
 prepare_virtual_env;
 pwd;
 ls test_env;
-ls test_env/bin;
+ls test_env/Scripts;
 echo "-- Install python packages"
 install_packages;
