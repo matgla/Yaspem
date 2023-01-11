@@ -39,5 +39,6 @@ shift $((OPTIND-1))
 echo "-- Remove test env"
 echo "-- Prepare virtual env"
 prepare_virtual_env;
+ls test_env/bin
 echo "-- Install python packages"
 install_packages;
