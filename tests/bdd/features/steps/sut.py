@@ -8,6 +8,7 @@ from behave import *
 
 working_dir = pathlib.Path(__file__).parent.parent.parent.parent.parent
 test_dir = pathlib.Path(__file__).parent.parent
+python_executable = "Scripts/python3.exe" if os.name == "nt" else "bin/python3"
 
 def expectation_msg(context, expectation):
     return "\n------------------------------\nExpected: " + expectation + "\n" + "Stdout: " \
@@ -19,7 +20,7 @@ def file_expectation_msg(expectation, content):
 
 def execute_sut(args = []):
     root_dir = pathlib.Path(__file__).parent.parent.parent.parent.parent.resolve()
-    python_path = root_dir / "test_env" / "bin" / "python3"
+    python_path = root_dir / "test_env" / python_executable
     yaspem_path = root_dir / "yaspem.py"
     args_to_run = [python_path, yaspem_path]
     args_to_run.extend(args)
