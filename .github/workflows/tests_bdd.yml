@@ -1,0 +1,43 @@
+name: BDD Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ut:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu",
+            os: ubuntu-22.04
+          }
+        - {
+            name: "Windows",
+            os: windows-2022
+          }
+        - {
+            name: "MacOS",
+            os: macos-12
+          }
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Print environment
+        shell: bash
+        run: |
+          echo github.event.action: ${{ github.event.action }}
+          echo github.event_name: ${{ github.event_name }}
+      - name: Prepare test environment
+        shell: bash
+        run: |
+          ./prepare_test_env.sh
+          make tests_bdd
