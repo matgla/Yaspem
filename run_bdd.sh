@@ -7,4 +7,7 @@ case "$(uname -sr)" in
         python_exec=test_env/bin/python3;;
 esac
 
-cd tests/bdd && ../../$python_exec -m behave
+pwd;
+ls ../../test_env;
+ls ../../test_env/Scripts;
+cd tests/bdd && ../../$python_exec -m behave;
