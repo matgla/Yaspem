@@ -42,4 +42,6 @@ jobs:
           pip3 install virtualenv
           ./prepare_test_env.sh
       - name: Execute tests
+        shell: bash
+        run: |
           make tests_bdd
