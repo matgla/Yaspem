@@ -165,5 +165,5 @@ ${package_name_SOURCE_DIR}: directory to package sources
 
 # Features to be implemented:
 
-- [ ] Add argument to specify path for packages
+- [x] Add argument to specify path for packages
 

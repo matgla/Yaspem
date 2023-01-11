@@ -1,16 +1,21 @@
-function (initialize_packages)
+function (initialize_packages package_files)
     find_package (Python3 COMPONENTS Interpreter)
     if (NOT Python3_FOUND)
         message (FATAL_ERROR "Can't find python3 executable")
     endif ()
-    include (mspkg)
+    include (yaspem)
 
-    if (NOT mspkg_executable)
-        set (mspkg_executable "${mspkg_SOURCE_DIR}/mspkg.py" CACHE INTERNAL "")
+    if (NOT yaspem_executable)
+        set (yaspem_executable "${yaspem_SOURCE_DIR}/yaspem.py" CACHE INTERNAL "")
     endif()
 
-    message (STATUS "Command: ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} --cmake")
-    execute_process(COMMAND ${python_executable} ${mspkg_executable} -o ${mspkg_SOURCE_DIR} -b ${mspkg_BINARY_DIR} --cmake
+    set (yaspem_command "${python_executable} ${yaspem_executable} -o ${yaspem_SOURCE_DIR} --cmake")
+    if (package_files)
+        set (yaspem_command "${yaspem_command} -i ${package_files}")
+    endif ()
+
+    message (STATUS "Command: ${yaspem_command}")
+    execute_process(COMMAND ${yaspem_command}
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         COMMAND_ERROR_IS_FATAL ANY
     )
@@ -25,23 +30,23 @@ function (setup_virtualenv source_directory)
 
     file (GLOB virtualenv_file_stamp ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp)
     if (NOT virtualenv_file_stamp)
-        message (STATUS "Configure virtualenv: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
+        message (STATUS "Configure virtualenv: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv")
         execute_process(
-            COMMAND ${virtualenv_exec} -p python3 mspkg_venv
+            COMMAND ${virtualenv_exec} -p python3 yaspem_venv
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMAND_ERROR_IS_FATAL ANY
         )
 
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/pip)
-            set (mspkg_pip ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/pip)
-        elseif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
-            set (mspkg_pip ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/pip.exe) 
-        else () 
-            message (FATAL_ERROR "Can't find pip executable under: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/pip)
+            set (yaspem_pip ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/pip)
+        elseif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/pip.exe)
+            set (yaspem_pip ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/pip.exe)
+        else ()
+            message (FATAL_ERROR "Can't find pip executable under: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv")
         endif ()
 
         execute_process(
-            COMMAND ${mspkg_pip} install -r ${source_directory}/requirements.txt --upgrade -q -q -q
+            COMMAND ${yaspem_pip} install -r ${source_directory}/requirements.txt --upgrade -q -q -q
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             COMMAND_ERROR_IS_FATAL ANY
         )
@@ -52,12 +57,12 @@ function (setup_virtualenv source_directory)
             COMMAND_ERROR_IS_FATAL ANY
         )
 
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/python3)
-            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/bin/python3 CACHE INTERNAL "" FORCE)
-        elseif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/python.exe) 
-            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv/Scripts/python.exe CACHE INTERNAL "" FORCE)
-        else () 
-            message (FATAL_ERROR "Can't find python 3 executable under: ${CMAKE_CURRENT_BINARY_DIR}/mspkg_venv")
+        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3)
+            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3 CACHE INTERNAL "" FORCE)
+        elseif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe)
+            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe CACHE INTERNAL "" FORCE)
+        else ()
+            message (FATAL_ERROR "Can't find python 3 executable under: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv")
         endif ()
 
 
@@ -66,10 +71,10 @@ function (setup_virtualenv source_directory)
     endif ()
 endfunction ()
 
-function (setup_mspkg source_directory)
+function (setup_yaspem source_directory package_files)
     setup_virtualenv(${source_directory})
-    initialize_packages()
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${mspkg_SOURCE_DIR}/packages/modules PARENT_SCOPE)
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${mspkg_SOURCE_DIR}/packages/modules)
+    initialize_packages(${package_files})
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${yaspem_SOURCE_DIR}/packages/modules PARENT_SCOPE)
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${yaspem_SOURCE_DIR}/packages/modules)
 
 endfunction ()
