@@ -22,9 +22,9 @@ def execute_sut(args = []):
     root_dir = pathlib.Path(__file__).parent.parent.parent.parent.parent.resolve()
     python_path = root_dir / "test_env" / python_executable
     yaspem_path = root_dir / "yaspem.py"
-    args_to_run = [python_path, yaspem_path]
+    args_to_run = [python_path.absolute(), yaspem_path]
     args_to_run.extend(args)
-    return run(args_to_run, capture_output=True, cwd=working_dir)
+    return run(args_to_run, capture_output=True, cwd=working_dir.absolute())
 
 @given('we have YASPEM executable')
 def step_impl(context):
