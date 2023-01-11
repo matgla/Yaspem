@@ -67,12 +67,13 @@ def main():
     parser.add_argument("-b", dest="binary_dir", action="store", default="", help="binary directory")
     args, rest = parser.parse_known_args()
 
-    input_files = ["packages.json"]
     output_directory = "packages"
     print("Dependencies list: ")
-
+    print(args.input)
     if args.input:
         input_files = [s.strip() for s in args.input.split(",")]
+    else:
+        input_files = ["packages.json"]
 
     for i, n in enumerate(input_files):
         input_files[i] = Path(n) 
@@ -222,16 +223,12 @@ def main():
                             for variable in package["options"]["cmake_variables"]:
                                 module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
                         if not "include" in package["options"] or package["options"]["include"]:
-                            module.write("    add_subdirectory(" + str(package_directory) + " " + args.binary_dir + "/" + package["target"] + ")\n")
+                            module.write("    add_subdirectory(" + str(package_directory) + " " + str(output_directory / args.binary_dir / package["target"]) + ")\n")
 
                         module.write("    if (NOT TARGET " + package["target"] + ")\n")
                         module.write("        add_library(" + package["target"] + " INTERFACE)\n")
                         module.write("    endif()\n")
                         module.write("endif ()\n")
-
-
-
-        # if (args)
                 with open(cache_file, "w") as file:
                     file.write(json.dumps(cache))
 

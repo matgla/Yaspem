@@ -1,3 +1,19 @@
+# This file is part of YASPEM project.
+# Copyright (C) 2023 Mateusz Stadnik
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import pathlib
 import os
 import platform
@@ -20,7 +36,7 @@ def file_expectation_msg(expectation, content):
         + content + "\n---------------------------\n"
 
 def execute_sut(context, args = []):
-    root_dir = pathlib.Path(__file__).parent.parent.parent.parent.parent.resolve()
+    root_dir = working_dir.resolve()
     python_path = root_dir / "test_env" / python_executable
     yaspem_path = root_dir / "yaspem.py"
     args_to_run = [str(python_path), str(yaspem_path)]
@@ -66,7 +82,7 @@ def rmdirReadOnly(action, name, exec):
 
 @Given('output directory')
 def step_impl(context):
-    context.output_dir = working_dir / pathlib.Path("test_output") / pathlib.Path(context.text) 
+    context.output_dir = working_dir / pathlib.Path("test_output") / pathlib.Path(context.text.strip()) 
     if os.path.exists(context.output_dir):
         shutil.rmtree(context.output_dir, onerror=rmdirReadOnly)
 

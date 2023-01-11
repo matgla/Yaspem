@@ -1,4 +1,4 @@
-function (initialize_packages package_files)
+function (initialize_packages source_directory output_directory package_files)
     find_package (Python3 COMPONENTS Interpreter)
     if (NOT Python3_FOUND)
         message (FATAL_ERROR "Can't find python3 executable")
@@ -6,20 +6,20 @@ function (initialize_packages package_files)
     include (yaspem)
 
     if (NOT yaspem_executable)
-        set (yaspem_executable "${yaspem_SOURCE_DIR}/yaspem.py" CACHE INTERNAL "")
+        set (yaspem_executable "${source_directory}/yaspem.py" CACHE INTERNAL "" FORCE)
     endif()
 
-    set (yaspem_command "${python_executable} ${yaspem_executable} -o ${yaspem_SOURCE_DIR} --cmake")
-    if (package_files)
-        set (yaspem_command "${yaspem_command} -i ${package_files}")
+    set (yaspem_args "-o ${output_directory}")
+    list (APPEND yaspem_args "--cmake")
+    if (NOT ${package_files} STREQUAL "none")
+        list (APPEND yaspem_args "-i ${package_files}")
     endif ()
 
-    message (STATUS "Command: ${yaspem_command}")
-    execute_process(COMMAND ${yaspem_command}
-        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    message (STATUS "Command: '${python_executable} ${yaspem_executable} ${yaspem_args}' in ${CMAKE_BINARY_DIR}")
+    execute_process(COMMAND ${python_executable} ${yaspem_executable} ${yaspem_args}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMAND_ERROR_IS_FATAL ANY
     )
-
 endfunction()
 
 function (setup_virtualenv source_directory)
@@ -71,10 +71,16 @@ function (setup_virtualenv source_directory)
     endif ()
 endfunction ()
 
-function (setup_yaspem source_directory package_files)
-    setup_virtualenv(${source_directory})
-    initialize_packages(${package_files})
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${yaspem_SOURCE_DIR}/packages/modules PARENT_SCOPE)
-    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${yaspem_SOURCE_DIR}/packages/modules)
-
-endfunction ()
+macro (setup_yaspem)
+    set(options "")
+    set(oneValueArgs YASPEM_SOURCE OUTPUT_DIRECTORY)
+    set(multipleValueArgs PACKAGE_FILES)
+    cmake_parse_arguments(SETUP_YASPEM "" "${oneValueArgs}" "${multipleValueArgs}" ${ARGN})
+    setup_virtualenv(${SETUP_YASPEM_YASPEM_SOURCE})
+    if (NOT SETUP_YASPEM_PACKAGE_FILES)
+        set (SETUP_YASPEM_PACKAGE_FILES "none")
+    endif ()
+    initialize_packages(${SETUP_YASPEM_YASPEM_SOURCE} ${SETUP_YASPEM_OUTPUT_DIRECTORY} ${SETUP_YASPEM_PACKAGE_FILES})
+    message(STATUS "")
+    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_BINARY_DIR}/packages/modules)
+endmacro ()

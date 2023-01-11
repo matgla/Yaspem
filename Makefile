@@ -1,4 +1,4 @@
-tests_bdd: prepare
+tests_bdd:
 	sh run_bdd.sh
 
 prepare:
