@@ -1,6 +1,6 @@
 import pathlib
 import os
-import filecmp
+import platform
 from subprocess import run
 import shutil
 
@@ -8,7 +8,7 @@ from behave import *
 
 working_dir = pathlib.Path(__file__).parent.parent.parent.parent.parent
 test_dir = pathlib.Path(__file__).parent.parent
-python_executable = "Scripts/python3.exe" if os.name == "nt" else "bin/python3"
+python_executable = "Scripts/python3.exe" if platform.system() == "Windows" else "bin/python3"
 
 def expectation_msg(context, expectation):
     return "\n------------------------------\nExpected: " + expectation + "\n" + "Stdout: " \
