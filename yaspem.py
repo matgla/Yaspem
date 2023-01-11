@@ -74,16 +74,20 @@ def main():
     if args.input:
         input_files = [s.strip() for s in args.input.split(",")]
 
+    for i, n in enumerate(input_files):
+        input_files[i] = Path(n) 
+
     for input_file in input_files:
         if not os.path.exists(input_file):
-            print("error: input file '" + input_file + "' not found", file=sys.stderr)
+            print("error: input file '" + str(input_file) + "' not found", file=sys.stderr)
             sys.exit(1)
 
     if args.output:
         args.output = args.output.strip()
-        output_directory = args.output + "/packages"
+        output_directory = Path(args.output) / "packages"
 
-    cache_file = args.output + "/cache.json"
+    cache_file = output_directory / "cache.json"
+    print ("Output directory: ", output_directory)
     cache = {}
     if os.path.exists(cache_file):
         with open(cache_file, "r") as file:
@@ -95,7 +99,7 @@ def main():
         cache["timestamps"]["package_file"] = {}
     for input_file in input_files:
         if not input_file in cache["timestamps"]["package_file"]:
-            cache["timestamps"]["package_file"][input_file] = os.path.getmtime(input_file)
+            cache["timestamps"]["package_file"][str(input_file)] = os.path.getmtime(input_file)
 
     priority = len(Path(os.getcwd()).parts)
     print("Priority: ", priority)
@@ -107,9 +111,9 @@ def main():
             input_json = json.loads(input_data.read())
             current_path = os.path.dirname(os.path.abspath(__file__))
             if not os.path.isabs(output_directory):
-                output_directory = current_path + "/" + output_directory
-            sources_directory = output_directory + "/" + "sources"
-            modules_directory = output_directory + "/" + "modules"
+                output_directory = current_path / output_directory
+            sources_directory = output_directory / "sources"
+            modules_directory = output_directory / "modules"
 
             if not os.path.exists(output_directory):
                 print ("Creating output directory: ", output_directory)
@@ -138,8 +142,8 @@ def main():
                     directory_suffix = package["target"]
                 else:
                     directory_suffix = package["directory"]
-                package_directory = sources_directory + "/" + directory_suffix
-                print ("directory: ", package_directory)
+                package_directory = (Path(sources_directory) / directory_suffix).resolve()
+                print ("directory: ", package_directory, file=sys.stderr)
                 if package["type"] == "git":
 
                     if os.path.exists(package_directory):
@@ -176,7 +180,7 @@ def main():
 
                 if args.use_cmake:
                     print ("Generate CMake target: ", package["target"])
-                    target_path = modules_directory + "/Find" + package["target"] + ".cmake"
+                    target_path = modules_directory / ("Find" + package["target"] + ".cmake")
                     with open(target_path, "w") as module:
                         module.write("\
     ###########################################################\n\
@@ -186,16 +190,16 @@ def main():
                         package_source_variable = package["target"] + "_SOURCE_DIR"
                         if "is_cmake_library" in package["options"]:
                             if package["options"]["is_cmake_library"]:
-                                module.write("set (" + package_source_variable + " \"" + package_directory  + "\")\n")
-                                module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"" + package_directory + "\")")
+                                module.write("set (" + package_source_variable + " \"" + str(package_directory)  + "\")\n")
+                                module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"" + str(package_directory) + "\")")
                                 continue
                         module.write("if (NOT TARGET " + package["target"] + ")\n")
-                        module.write("    set (" + package_source_variable + " \"" + package_directory  + "\")\n")
+                        module.write("    set (" + package_source_variable + " \"" + str(package_directory)  + "\")\n")
                         if "create_library" in package["options"]:
                             sources_search = ""
                             library_type = package["options"]["create_library"]["type"]
                             for keyword in package["options"]["create_library"]["sources_filter"]:
-                                sources_search += " " + package_directory + "/" + package["options"]["create_library"]["sources_directory"] + "/" + keyword
+                                sources_search += " " + str(package_directory) + "/" + package["options"]["create_library"]["sources_directory"] + "/" + keyword
                             module.write("    file(GLOB_RECURSE SRCS " + sources_search + ")\n")
                             module.write("    message(STATUS \"" + package["target"] + " sources: ${SRCS}\")\n")
                             module.write("    set (" + package["target"] + "_sources ${SRCS})\n")
@@ -207,7 +211,7 @@ def main():
                                 include_type = "INTERFACE"
                             include_paths = ""
                             for directory in package["options"]["create_library"]["include_directories"]:
-                                include_paths += " " + package_directory + "/" + directory
+                                include_paths += " " + str(package_directory) + "/" + directory
                             if len(include_paths):
                                 module.write("    target_include_directories(" + package["target"] + " " + include_type + " " + include_paths + ")\n")
                             if "compile_definitions" in package["options"]["create_library"]:
@@ -218,7 +222,7 @@ def main():
                             for variable in package["options"]["cmake_variables"]:
                                 module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
                         if not "include" in package["options"] or package["options"]["include"]:
-                            module.write("    add_subdirectory(" + package_directory + " " + args.binary_dir + "/" + package["target"] + ")\n")
+                            module.write("    add_subdirectory(" + str(package_directory) + " " + args.binary_dir + "/" + package["target"] + ")\n")
 
                         module.write("    if (NOT TARGET " + package["target"] + ")\n")
                         module.write("        add_library(" + package["target"] + " INTERFACE)\n")

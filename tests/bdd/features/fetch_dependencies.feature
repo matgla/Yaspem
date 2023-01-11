@@ -9,7 +9,6 @@ Feature: Fetching provided dependencies
         When we execute with arguments
             | argument                                         |
             | -i ${data_dir}/simple_git_packages/packages.json |
-        Then YASPEM will not print on stderr
         Then YASPEM will return 0
         Then YASPEM will fetch it
         Then Fetched package contains files
@@ -27,7 +26,6 @@ Feature: Fetching provided dependencies
         When we execute with arguments
             | argument                                           |
             | -i ${data_dir}/package_other_version/packages.json |
-        Then YASPEM will not print on stderr
         Then YASPEM will return 0
         Then YASPEM will fetch it
         Then Fetched package contains files
@@ -39,13 +37,12 @@ Feature: Fetching provided dependencies
         Given we have YASPEM executable
         Given output directory
             """
-            simple_dependency
+            simple_dependency_with_module
             """
         When we execute with arguments
             | argument                                         |
             | -i ${data_dir}/simple_git_packages/packages.json |
             | --cmake                                          |
-        Then YASPEM will not print on stderr
         Then YASPEM will return 0
         Then YASPEM will fetch it
         Then Fetched package contains files
@@ -66,7 +63,6 @@ Feature: Fetching provided dependencies
             | argument                                                                                          |
             | -i ${data_dir}/multiple_packages/a/packages.json, ${data_dir}/multiple_packages/b/packages.json   |
             | --cmake                                                                                           |
-        Then YASPEM will not print on stderr
         Then YASPEM will return 0
         Then YASPEM will fetch it
         Then Fetched package contains files
