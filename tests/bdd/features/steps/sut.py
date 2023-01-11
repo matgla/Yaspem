@@ -24,7 +24,6 @@ def execute_sut(args = []):
     yaspem_path = root_dir / "yaspem.py"
     args_to_run = [str(python_path.resolve()), str(yaspem_path.resolve())]
     args_to_run.extend(args)
-    assert False, "yy: " + str(args_to_run)
     return run(args_to_run, capture_output=True, cwd=working_dir.absolute())
 
 @given('we have YASPEM executable')
