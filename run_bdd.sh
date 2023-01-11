@@ -8,6 +8,6 @@ case "$(uname -sr)" in
 esac
 
 pwd;
-ls ../../test_env;
-ls ../../test_env/Scripts;
+ls test_env;
+ls test_env/Scripts;
 cd tests/bdd && ../../$python_exec -m behave;
