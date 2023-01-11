@@ -1,16 +1,23 @@
 #!/bin/bash
 
+case "$(uname -sr)" in
+    CYGWIN*|MINGW*|MINGW32*|MSYS*)
+        pip_exec=test_env/bin/pip3.exe;;
+    *)
+        pip_exec=test_env/bin/pip3;;
+esac
+
 panic() { echo "$*" >&2; exit 2; }
 
 remove_test_env() { rm -rf test_env; }
 
-install_packages() { test_env/bin/pip3 install -r tests/bdd/requirements.txt --upgrade; }
+install_packages() { $pip_exec install -r tests/bdd/requirements.txt --upgrade; }
 
-prepare_virtual_env() { 
+prepare_virtual_env() {
     if [ -f test_env/pyvenv.cfg ]; then
         echo "-- Virtual env exists, creation skipped.";
-    else 
-        virtualenv --python=python3 test_env; 
+    else
+        virtualenv --python=python3 test_env;
     fi
 }
 
@@ -26,7 +33,7 @@ do
         ??* )           panic "Unknown argument --$OPT";;
         ? )             exit 2;;
     esac
-done 
+done
 shift $((OPTIND-1))
 
 echo "-- Remove test env"
