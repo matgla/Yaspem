@@ -4,12 +4,8 @@
             "link": "https://github.com/matgla/yaspem_tests.git",
             "type": "git",
             "version": "some_branch",
-            "directory": "simple",
-            "target": "simple_test",
+            "target": "simple",
             "options": {
-                "cmake_variables": {
-                    "DISABLE_TESTS": "ON"
-                }
             }
         }
     ]

@@ -2,6 +2,7 @@ import pathlib
 import os
 import filecmp
 from subprocess import run
+import shutil
 
 from behave import *
 
@@ -32,9 +33,6 @@ def step_impl(context):
 @when('we execute with dependency file')
 def step_impl(context):
     if context.output_dir:
-        test_directory = working_dir / "test_output" / context.output_dir
-        if os.path.exists(test_directory):
-            os.rmdir(test_directory)
         context.executable(["-o " + context.output_dir])
     else:
         context.executable()
@@ -43,10 +41,6 @@ def step_impl(context):
 @when('we execute with arguments')
 def step_impl(context):
     args = []
-    if context.output_dir:
-        test_directory = working_dir / "test_output" / context.output_dir
-        if os.path.exists(test_directory):
-            os.rmdir(test_directory)
     for row in context.table:
         args.append(row["argument"]
             .replace("${data_dir}", str(test_dir / "data"))
@@ -62,9 +56,9 @@ def step_impl(context):
 
 @Given('output directory')
 def step_impl(context):
-    context.output_dir = "test_output/" + context.text
-    if os.path.exists(context.output_dir):
-        os.rmdir(context.output_dir)
+    context.output_dir = context.text
+    if os.path.exists(working_dir / context.output_dir):
+        shutil.rmtree(working_dir / context.output_dir, ignore_errors=True)
 
 @then('YASPEM will show usage text')
 def step_impl(context):

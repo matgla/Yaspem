@@ -25,7 +25,7 @@ Feature: Fetching provided dependencies
             other_version
             """
         When we execute with arguments
-            | argument                                         |
+            | argument                                           |
             | -i ${data_dir}/package_other_version/packages.json |
         Then YASPEM will not print on stderr
         Then YASPEM will return 0
@@ -33,6 +33,7 @@ Feature: Fetching provided dependencies
         Then Fetched package contains files
             | package | file     | content             |
             | simple  | data.txt | branch: some_branch |
+        Then CMake Modules are empty
 
     Scenario: generate CMake modules
         Given we have YASPEM executable
@@ -52,5 +53,28 @@ Feature: Fetching provided dependencies
             | simple  | data.txt | branch: main |
         Then Fetched module contains files
             | file                  |
-            | Findsimple_test.cmake |
+            | Findsimple.cmake |
+        Then CMake is able to find new module
+
+    Scenario: fetch from more than one packages file
+        Given we have YASPEM executable
+        Given output directory
+            """
+            multiple_packages_list
+            """
+        When we execute with arguments
+            | argument                                                                                          |
+            | -i ${data_dir}/multiple_packages/a/packages.json, ${data_dir}/multiple_packages/b/packages.json   |
+            | --cmake                                                                                           |
+        Then YASPEM will not print on stderr
+        Then YASPEM will return 0
+        Then YASPEM will fetch it
+        Then Fetched package contains files
+            | package    | file     | content               |
+            | package_a  | data.txt | branch: main          |
+            | package_b  | data.txt | branch: some_branch   |
+        Then Fetched module contains files
+            | file                      |
+            | Findpackage_a.cmake       |
+            | Findpackage_b.cmake       |
         Then CMake is able to find new module

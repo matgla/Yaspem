@@ -3,8 +3,8 @@
         {
             "link": "https://github.com/matgla/yaspem_tests.git",
             "type": "git",
-            "version": "some_branch",
-            "target": "simple",
+            "version": "main",
+            "target": "package_a",
             "options": {
             }
         }
