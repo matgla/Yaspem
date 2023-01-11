@@ -1,8 +1,8 @@
-tests_bdd:
-	cd tests/bdd && ../../test_env/bin/python3 -m behave
+tests_bdd: prepare
+	sh run_bdd.sh
 
 prepare:
-	sh prepare_test_env.sh 
+	sh prepare_test_env.sh
 
 clean:
 	sh prepare_test_env.sh --clear
