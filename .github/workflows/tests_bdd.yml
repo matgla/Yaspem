@@ -39,5 +39,6 @@ jobs:
       - name: Prepare test environment
         shell: bash
         run: |
+          pip3 install virtualenv
           ./prepare_test_env.sh
           make tests_bdd
