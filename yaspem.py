@@ -85,7 +85,7 @@ def main():
 
     if args.output:
         args.output = args.output.strip()
-        output_directory = Path(args.output) / "packages"
+        output_directory = Path(args.output)
 
     cache_file = output_directory / "cache.json"
     print ("Output directory: ", output_directory)
