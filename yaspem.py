@@ -67,7 +67,7 @@ def main():
     parser.add_argument("-b", dest="binary_dir", action="store", default="", help="binary directory")
     args, rest = parser.parse_known_args()
 
-    output_directory = "packages"
+    output_directory = "" if args.output else "packages"
     print("Dependencies list: ")
     print(args.input)
     if args.input:
@@ -85,7 +85,7 @@ def main():
 
     if args.output:
         args.output = args.output.strip()
-        output_directory = Path(args.output) / "packages"
+        output_directory = Path(args.output)
 
     cache_file = output_directory / "cache.json"
     print ("Output directory: ", output_directory)

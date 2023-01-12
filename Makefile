@@ -6,3 +6,4 @@ prepare:
 
 clean:
 	sh prepare_test_env.sh --clear
+	rm -rf test_output
