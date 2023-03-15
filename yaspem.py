@@ -21,11 +21,23 @@ import json
 import subprocess
 import os
 import sys
+from tqdm import tqdm
 
 from pathlib import Path
 
-from git import Repo
+from git import Repo,RemoteProgress
 import configparser
+
+# From: https://stackoverflow.com/a/65576165 
+class CloneProgress(RemoteProgress):
+    def __init__(self):
+        super().__init__()
+        self.pbar = tdqm()
+
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        self.pbar.total = max_count 
+        self.pbar.n = cur_count 
+        self.pbar.refresh() 
 
 class bcolors:
     HEADER = '\033[95m'
@@ -38,7 +50,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def git_clone(repository_link, path):
-    Repo.clone_from(repository_link, path)
+    Repo.clone_from(repository_link, path, progress=CloneProgress)
 
 def is_correct_tag(repo, required_tag):
     for tag in repo.tags:
