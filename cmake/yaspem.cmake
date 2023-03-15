@@ -57,18 +57,18 @@ function (setup_virtualenv source_directory)
             COMMAND_ERROR_IS_FATAL ANY
         )
 
-        if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3)
-            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3 CACHE INTERNAL "" FORCE)
-        elseif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe)
-            set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe CACHE INTERNAL "" FORCE)
-        else ()
-            message (FATAL_ERROR "Can't find python 3 executable under: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv")
-        endif ()
-
 
         file (GLOB virtualenv_file_stamp ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp)
         message (STATUS "Virtualenv created, stamp file: ${virtualenv_file_stamp}")
     endif ()
+    if (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3)
+        set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3 CACHE INTERNAL "" FORCE)
+    elseif (EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe)
+        set (python_executable ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe CACHE INTERNAL "" FORCE)
+    else ()
+        message (FATAL_ERROR "Can't find python 3 executable under: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv")
+    endif ()
+
 endfunction ()
 
 macro (setup_yaspem)

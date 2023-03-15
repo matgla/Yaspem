@@ -47,6 +47,7 @@ class GitUpdateProgress(UpdateProgress):
         self.pbar = tqdm()
 
     def update(self, op_code, cur_count, max_count=None, message=''):
+        print ("Op: ", op_code, ", cur: ", cur_count, ", max_count: ", max_count)
         self.pbar.total = max_count
         self.pbar.n = cur_count
         self.pbar.refresh()
