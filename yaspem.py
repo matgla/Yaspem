@@ -16,28 +16,98 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import argparse
 import json
 import subprocess
 import os
 import sys
-from tqdm import tqdm
 
 from pathlib import Path
 
 from git import Repo,RemoteProgress
 import configparser
 
-# From: https://stackoverflow.com/a/65576165 
-class CloneProgress(RemoteProgress):
-    def __init__(self):
-        super().__init__()
-        self.pbar = tdqm()
 
-    def update(self, op_code, cur_count, max_count=None, message=''):
-        self.pbar.total = max_count 
-        self.pbar.n = cur_count 
-        self.pbar.refresh() 
+import git
+from rich import console, progress
+
+# from: https://stackoverflow.com/a/71285627
+class GitRemoteProgress(git.RemoteProgress):
+    OP_CODES = [
+        "BEGIN",
+        "CHECKING_OUT",
+        "COMPRESSING",
+        "COUNTING",
+        "END",
+        "FINDING_SOURCES",
+        "RECEIVING",
+        "RESOLVING",
+        "WRITING",
+    ]
+    OP_CODE_MAP = {
+        getattr(git.RemoteProgress, _op_code): _op_code for _op_code in OP_CODES
+    }
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.progressbar = progress.Progress(
+            progress.SpinnerColumn(),
+            # *progress.Progress.get_default_columns(),
+            progress.TextColumn("[progress.description]{task.description}"),
+            progress.BarColumn(),
+            progress.TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            "eta",
+            progress.TimeRemainingColumn(),
+            progress.TextColumn("{task.fields[message]}"),
+            console=console.Console(),
+            transient=False,
+        )
+        self.progressbar.start()
+        self.active_task = None
+
+    def __del__(self) -> None:
+        # logger.info("Destroying bar...")
+        self.progressbar.stop()
+
+    @classmethod
+    def get_curr_op(cls, op_code: int) -> str:
+        """Get OP name from OP code."""
+        # Remove BEGIN- and END-flag and get op name
+        op_code_masked = op_code & cls.OP_MASK
+        return cls.OP_CODE_MAP.get(op_code_masked, "?").title()
+
+    def update(
+        self,
+        op_code: int,
+        cur_count: str | float,
+        max_count: str | float | None = None,
+        message: str | None = "",
+    ) -> None:
+        # Start new bar on each BEGIN-flag
+        if op_code & self.BEGIN:
+            self.curr_op = self.get_curr_op(op_code)
+            # logger.info("Next: %s", self.curr_op)
+            self.active_task = self.progressbar.add_task(
+                description=self.curr_op,
+                total=max_count,
+                message=message,
+            )
+
+        self.progressbar.update(
+            task_id=self.active_task,
+            completed=cur_count,
+            message=message,
+        )
+
+        # End progress monitoring on each END-flag
+        if op_code & self.END:
+            # logger.info("Done: %s", self.curr_op)
+            self.progressbar.update(
+                task_id=self.active_task,
+                message=f"[bright_black]{message}",
+            )
 
 class bcolors:
     HEADER = '\033[95m'
@@ -50,7 +120,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 def git_clone(repository_link, path):
-    Repo.clone_from(repository_link, path, progress=CloneProgress)
+    Repo.clone_from(repository_link, path, progress=GitRemoteProgress())
 
 def is_correct_tag(repo, required_tag):
     for tag in repo.tags:
@@ -172,7 +242,7 @@ def main():
                         try:
                             for submodule in repo.submodules:
                                 print (" > " + str(submodule))
-                                submodule.update(init=True)
+                                submodule.update(init=True, progress=GitRemoteProgress())
                         except configparser.NoOptionError:
                             print ("Can't update submodules, invalid entry")
                     if not is_correct_tag(repo, package["version"]):
