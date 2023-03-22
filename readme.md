@@ -1,5 +1,8 @@
 # Yaspem - Yet Another Simple PackagE Manager
 
+![yaspem_logo](https://user-images.githubusercontent.com/10617824/227028304-21982572-b2c9-4364-8593-07b31e7c94bf.png)
+
+
 The yaspem is tool to manage dependencies within CMake.
 It allows to fetch sources automatically with specific version.
 Also creates wrapping files to find packages with find_package command.
