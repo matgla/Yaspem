@@ -216,16 +216,16 @@ def main():
                         package_source_variable = package["target"] + "_SOURCE_DIR"
                         if "is_cmake_library" in package["options"]:
                             if package["options"]["is_cmake_library"]:
-                                module.write("set (" + package_source_variable + " \"" + str(package_directory)  + "\")\n")
-                                module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"" + str(package_directory) + "\")")
+                                module.write("set (" + package_source_variable + " \"" + str(package_directory.as_posix())  + "\")\n")
+                                module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"" + str(package_directory.as_posix()) + "\")")
                                 continue
                         module.write("if (NOT TARGET " + package["target"] + ")\n")
-                        module.write("    set (" + package_source_variable + " \"" + str(package_directory)  + "\")\n")
+                        module.write("    set (" + package_source_variable + " \"" + str(package_directory.as_posix())  + "\")\n")
                         if "create_library" in package["options"]:
                             sources_search = ""
                             library_type = package["options"]["create_library"]["type"]
                             for keyword in package["options"]["create_library"]["sources_filter"]:
-                                sources_search += " " + str(package_directory) + "/" + package["options"]["create_library"]["sources_directory"] + "/" + keyword
+                                sources_search += " " + str(package_directory.as_posix()) + "/" + package["options"]["create_library"]["sources_directory"] + "/" + keyword
                             module.write("    file(GLOB_RECURSE SRCS " + sources_search + ")\n")
                             module.write("    message(STATUS \"" + package["target"] + " sources: ${SRCS}\")\n")
                             module.write("    set (" + package["target"] + "_sources ${SRCS})\n")
@@ -237,7 +237,7 @@ def main():
                                 include_type = "INTERFACE"
                             include_paths = ""
                             for directory in package["options"]["create_library"]["include_directories"]:
-                                include_paths += " " + str(package_directory) + "/" + directory
+                                include_paths += " " + str(package_directory.as_posix()) + "/" + directory
                             if len(include_paths):
                                 module.write("    target_include_directories(" + package["target"] + " " + include_type + " " + include_paths + ")\n")
                             if "compile_definitions" in package["options"]["create_library"]:
@@ -248,7 +248,7 @@ def main():
                             for variable in package["options"]["cmake_variables"]:
                                 module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
                         if not "include" in package["options"] or package["options"]["include"]:
-                            module.write("    add_subdirectory(" + str(package_directory) + " " + str((output_directory / args.binary_dir / package["target"])) + ")\n")
+                            module.write("    add_subdirectory(" + str(package_directory.as_posix()) + " " + str((output_directory / args.binary_dir / package["target"]).as_posix()) + ")\n")
 
                         module.write("    if (NOT TARGET " + package["target"] + ")\n")
                         module.write("        add_library(" + package["target"] + " INTERFACE)\n")
