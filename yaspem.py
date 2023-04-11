@@ -216,8 +216,8 @@ def main():
                         package_source_variable = package["target"] + "_SOURCE_DIR"
                         if "is_cmake_library" in package["options"]:
                             if package["options"]["is_cmake_library"]:
-                                module.write("set (" + package_source_variable + " \"" + str(package_directory.as_posix())  + "\")\n")
-                                module.write("set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"" + str(package_directory.as_posix()) + "\")")
+                                module.write("    set (" + package_source_variable + " \"" + str(package_directory.as_posix())  + "\")\n")
+                                module.write("    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} \"" + str(package_directory.as_posix()) + "\" CACHE INTERNAL \"\")")
                                 continue
                         module.write("if (NOT TARGET " + package["target"] + ")\n")
                         module.write("    set (" + package_source_variable + " \"" + str(package_directory.as_posix())  + "\")\n")
