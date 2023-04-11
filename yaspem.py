@@ -248,7 +248,7 @@ def main():
                             for variable in package["options"]["cmake_variables"]:
                                 module.write("    set (" + variable + " " + package["options"]["cmake_variables"][variable] + ")\n")
                         if not "include" in package["options"] or package["options"]["include"]:
-                            module.write("    add_subdirectory(" + str(package_directory.as_posix()) + " " + str((output_directory / args.binary_dir / package["target"]).as_posix()) + ")\n")
+                            module.write("    add_subdirectory(" + str(package_directory.as_posix()) + " " + str((output_directory / args.binary_dir / package["target"]).as_posix()) + " SYSTEM)\n")
 
                         module.write("    if (NOT TARGET " + package["target"] + ")\n")
                         module.write("        add_library(" + package["target"] + " INTERFACE)\n")
