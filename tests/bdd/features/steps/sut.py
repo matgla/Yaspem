@@ -41,9 +41,14 @@ def execute_sut(context, args = []):
     yaspem_path = root_dir / "yaspem.py"
     args_to_run = [str(python_path), str(yaspem_path)]
     args_to_run.extend(args)
+    if context.output_dir: 
+        if os.path.exists(context.output_dir): 
+            shutil.rmtree(context.output_dir)
     rc = subprocess.run(args_to_run, cwd=working_dir.absolute(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
     if context.output_dir:
+        if not os.path.exists(context.output_dir): 
+            os.mkdir(context.output_dir)
         with open(context.output_dir / "yaspem.log", "w") as f:
             f.write(rc.stdout)
     return rc
@@ -120,7 +125,7 @@ def step_impl(context):
 @then('Fetched package contains files')
 def step_impl(context):
     for row in context.table:
-        package_dir = context.output_dir / "packages" / "sources" / row["package"]
+        package_dir = context.output_dir / "sources" / row["package"]
         assert os.path.exists(package_dir), "Expected path: " + str(package_dir)
         file_dir = package_dir / row["file"]
         assert os.path.exists(file_dir)
@@ -130,14 +135,14 @@ def step_impl(context):
 
 @then('CMake Modules are empty')
 def step_impl(context):
-    modules_dir = context.output_dir / "packages" / "modules"
+    modules_dir = context.output_dir / "modules"
     assert os.path.exists(modules_dir), "Path not exists: " + str(modules_dir)
     assert len(os.listdir(modules_dir)) == 0
 
 @then('Fetched module contains files')
 def step_impl(context):
     for row in context.table:
-        module_dir = context.output_dir / "packages" / "modules"
+        module_dir = context.output_dir / "modules"
         assert os.path.exists(module_dir), "Expected path: " + str(module_dir)
         file_dir = module_dir / row["file"]
         assert os.path.exists(file_dir)
