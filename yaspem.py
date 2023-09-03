@@ -265,7 +265,7 @@ def main():
                                 module.write(
                                     '    set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "'
                                     + str(package_directory.as_posix())
-                                    + ")\n"
+                                    + '")\n'
                                 )
                                 continue
                         module.write("if (NOT TARGET " + package["target"] + ")\n")
