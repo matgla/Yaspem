@@ -1,0 +1,11 @@
+{
+  "dependencies": [
+    {
+      "link": "https://github.com/matgla/yaspem_tests.git",
+      "type": "git",
+      "version": "main",
+      "target": "package_a",
+      "options": {}
+    }
+  ]
+}
