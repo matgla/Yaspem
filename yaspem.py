@@ -350,6 +350,17 @@ def main():
                                     ]
                                     + ")\n"
                                 )
+
+                            if "compile_options" in package["options"]["create_library"]:
+                                options = package["options"]["create_library"]["compile_options"] 
+                                module.write("    target_compile_options(\n")
+                                for key in ["PUBLIC", "PRIVATE", "INTERFACE"]:
+                                    if key in module: 
+                                        module.write("        " + key)
+                                        for option in options[key]:
+                                            module.write("            " + option)
+                                module.write("    )")
+
                             module.write("endif ()\n")
                             continue
                         if "cmake_variables" in package["options"]:
