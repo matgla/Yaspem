@@ -18,56 +18,21 @@
 
 import argparse
 import json
-import subprocess
 import os
 import sys
 
 from pathlib import Path
 
-from git import Repo, RemoteProgress, UpdateProgress
 import configparser
 
-from tqdm import tqdm
+from arguments import parse_arguments
+from progress import GitRemoteProgress, GitUpdateProgress
+from packages_parser import parse_packages
 
-# from https://stackoverflow.com/a/65576165
-
-
-class GitRemoteProgress(RemoteProgress):
-    def __init__(self):
-        super().__init__()
-        self.pbar = tqdm()
-
-    def update(self, op_code, cur_count, max_count=None, message=""):
-        self.pbar.total = max_count
-        self.pbar.n = cur_count
-        self.pbar.refresh()
-
-
-class GitUpdateProgress(UpdateProgress):
-    def __init__(self):
-        super().__init__()
-        self.pbar = tqdm()
-
-    def update(self, op_code, cur_count, max_count=None, message=""):
-        self.pbar.total = max_count
-        self.pbar.n = cur_count
-        self.pbar.refresh()
-
-
-class bcolors:
-    HEADER = "\033[95m"
-    OKBLUE = "\033[94m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
-    ENDC = "\033[0m"
-    BOLD = "\033[1m"
-    UNDERLINE = "\033[4m"
-
+from git import Repo
 
 def git_clone(repository_link, path):
     Repo.clone_from(repository_link, path, progress=GitRemoteProgress())
-
 
 def is_correct_tag(repo, required_tag):
     for tag in repo.tags:
@@ -88,44 +53,16 @@ def submodules_update_required(package):
             return package["options"]["update_submodules"]
 
 
-def main():
-    print(bcolors.HEADER + "Package manager" + bcolors.ENDC)
 
-    parser = argparse.ArgumentParser(description="Package manager for CMake projects")
-    parser.add_argument(
-        "-i",
-        "--input",
-        dest="input",
-        action="store",
-        help="JSON file with dependencies (default: packages.json)",
-    )
-    parser.add_argument(
-        "-o",
-        "--output",
-        dest="output",
-        action="store",
-        help="directory where modules will be installed",
-        required=True,
-    )
-    parser.add_argument(
-        "--cmake",
-        dest="use_cmake",
-        action="store_true",
-        default="",
-        help="prepare packages for cmake",
-    )
-    parser.add_argument(
-        "-b", dest="binary_dir", action="store", default="", help="binary directory"
-    )
-    args, rest = parser.parse_known_args()
+
+def main():
+    # print(colorama.YELLOW + "Package manager" + bcolors.ENDC)
+    args = parse_arguments() 
+    packages = parse_packages()  
 
     output_directory = "" if args.output else "packages"
     print("Dependencies list: ")
     print(args.input)
-    if args.input:
-        input_files = [s.strip() for s in args.input.split(",")]
-    else:
-        input_files = ["packages.json"]
 
     for i, n in enumerate(input_files):
         input_files[i] = Path(n)

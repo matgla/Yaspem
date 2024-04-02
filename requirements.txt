@@ -1,3 +1,4 @@
-gitpython
-colorama
-tqdm
+GitPython==3.1.43
+colorama==0.4.6
+tqdm==4.66.2
+platformdirs==4.2.0
