@@ -23,17 +23,19 @@
 
 import argparse 
 
+from pathlib import Path
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Package manager for CMake projects")
     
     parser.add_argument(
-        "-i", "--input", dest="input", action="store", nargs="+", default="packages.json",
+        "-i", "--input", dest="input", action="store", nargs="+", default=["packages.json"],
         help="JSON file with dependencies (default: packages.json)",
     )
     
     parser.add_argument(
-        "-o", "--output", dest="output", action="store",
-        help="directory where modules will be installed", required=True,
+        "-o", "--output", dest="output", action="store", default="packages",
+        help="directory where modules will be installed",
     )
 
     parser.add_argument(
@@ -50,5 +52,15 @@ def parse_arguments():
     )
 
     args, _ = parser.parse_known_args()
+
+    args.output = Path(args.output).absolute()
+    inputs = [] 
+    for input in args.input: 
+        path = Path(input).absolute()
+        if not path.exists():
+            raise RuntimeError("Packages path not exists: " + path)
+        inputs.append(path)
+    args.input = inputs
+
     return args
 

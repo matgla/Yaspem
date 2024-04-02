@@ -21,6 +21,15 @@
 # <https://www.gnu.org/licenses/>.
 #
 
-def parse_packages(inputs):
-    for input in inputs:
+import colorama
 
+import json
+
+def __process_file(input, output_directory):
+    print(colorama.Fore.YELLOW + "  -> " + colorama.Style.RESET_ALL + str(input))
+    
+    
+def parse_packages(args):
+    print("Processing package file:")
+    for input in args.input:
+        __process_file(input, args.output)
