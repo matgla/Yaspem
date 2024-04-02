@@ -25,25 +25,37 @@ import json
 import datetime 
 
 class LocalCache:
+    @staticmethod
     def set_cache_output_directory(path):
         LocalCache.file = path / "cache.json"
+        LocalCache.data = {} 
         if LocalCache.file.exists():
-            with open(cache, "r") as file:
+            with open(LocalCache.file, "r") as file:
                 LocalCache.data = json.loads(file.read())
-            if not "timestamps" in LocalCache.data:
-                LocalCache.data["timestamps"] = {} 
-        
+        if not "timestamps" in LocalCache.data:
+            LocalCache.data["timestamps"] = {} 
+    
+    @staticmethod 
+    def __get_package_entry_name(package):
+        return package["target"] + "@" + package["version"] 
+    
+    @staticmethod
     def update_cache_entry(package):
+        package_entry = LocalCache.__get_package_entry_name(package)
         if not package["target"] in LocalCache.data:
-            LocalCache.data[package["target"]] = {
-                "timestamp" = datetime.timestamp(datetime.now()),
-                "version" = package["version"] 
-            }
+            LocalCache.data[package_entry] = datetime.timestamp(datetime.now())
 
-
+    @staticmethod 
+    def contains(package):
+        package_entry = LocalCache.__get_package_entry_name(package)
+        if package_entry in LocalCache.data:
+            return True 
+        return False 
+            
+    @staticmethod
     def store():
         if LocalCache.data != None and LocalCache.file != None:
-            with open(cache_file, "w") as file:
+            with open(LocalCache.file, "w") as file:
                 file.write(json.dumps(LocalCache.data))
     
 

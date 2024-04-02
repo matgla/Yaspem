@@ -22,16 +22,19 @@ import os
 import sys
 
 from pathlib import Path
+from platformdirs import user_cache_dir 
 
 import configparser
 
 from arguments import parse_arguments
 from progress import GitRemoteProgress, GitUpdateProgress
-from packages_parser import parse_packages
+from packages_parser import PackagesParser 
 
 from git import Repo
 
 import colorama
+
+from cache import LocalCache
 
 def git_clone(repository_link, path):
     Repo.clone_from(repository_link, path, progress=GitRemoteProgress())
@@ -61,36 +64,13 @@ def main():
     colorama.init()
     print(colorama.Fore.CYAN + "YASPEM - Packages manager" + colorama.Style.RESET_ALL)
     args = parse_arguments() 
-    packages = parse_packages(args)  
 
+    LocalCache.set_cache_output_directory(args.output)
+    cache_directory = user_cache_dir("yaspem", "Mateusz Stadnik")
+    print(cache_directory)
+    parser = PackagesParser(cache_directory) 
+    parser.parse_packages(args)  
 
-#     for input_file in input_files:
-#         if not os.path.exists(input_file):
-#             print(
-#                 "error: input file '" + str(input_file) + "' not found", file=sys.stderr
-#             )
-#             sys.exit(1)
-
-#     if args.output:
-#         args.output = args.output.strip()
-#         output_directory = Path(args.output)
-
-#     cache_file = output_directory / "cache.json"
-#     print("Output directory: ", output_directory)
-#     cache = {}
-#     if os.path.exists(cache_file):
-#         with open(cache_file, "r") as file:
-#             cache = json.loads(file.read())
-
-#     if not "timestamps" in cache:
-#         cache["timestamps"] = {}
-#     if not "package_file" in cache["timestamps"]:
-#         cache["timestamps"]["package_file"] = {}
-#     for input_file in input_files:
-#         if not input_file in cache["timestamps"]["package_file"]:
-#             cache["timestamps"]["package_file"][str(input_file)] = os.path.getmtime(
-#                 input_file
-#             )
 
 #     priority = len(Path(os.getcwd()).parts)
 #     print("Priority: ", priority)

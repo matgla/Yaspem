@@ -51,6 +51,14 @@ def parse_arguments():
         "-d", "--disable_cache", action="store_true", help="Disable cache usage"
     )
 
+    parser.add_argument(
+        "-n", "--no_network", action="store_true", help="Disable network operations, using only local cache"
+    )
+
+    parser.add_argument(
+        "-f", "--force", action="store_true", help="Force fetch packages"
+    )
+
     args, _ = parser.parse_known_args()
 
     args.output = Path(args.output).absolute()
@@ -58,7 +66,7 @@ def parse_arguments():
     for input in args.input: 
         path = Path(input).absolute()
         if not path.exists():
-            raise RuntimeError("Packages path not exists: " + path)
+            raise RuntimeError("Packages path not exists: " + str(path))
         inputs.append(path)
     args.input = inputs
 
