@@ -12,20 +12,12 @@ function(yaspem_initialize_packages source_directory output_directory
         CACHE INTERNAL "" FORCE)
   endif()
 
-  set(yaspem_args "-o ${output_directory}")
-  list(APPEND yaspem_args "--cmake")
-  string(REPLACE ";" "," package_files "${package_files}")
-
-  if(NOT "${package_files}" STREQUAL "")
-    list(APPEND yaspem_args "-i ${package_files}")
-  endif()
-
   message(
     STATUS
       "Command: '${python_executable} ${yaspem_executable} ${yaspem_args}' in ${CMAKE_BINARY_DIR}"
   )
   execute_process(
-    COMMAND ${python_executable} ${yaspem_executable} ${yaspem_args}
+    COMMAND ${python_executable} ${yaspem_executable} -o ${output_directory} -i ${package_files} --cmake
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND_ERROR_IS_FATAL ANY)
 endfunction()
 
@@ -99,6 +91,5 @@ macro(setup_yaspem)
     ${SETUP_YASPEM_YASPEM_SOURCE} ${SETUP_YASPEM_OUTPUT_DIRECTORY}
     "${SETUP_YASPEM_PACKAGE_FILES}")
   message(STATUS "")
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-                        ${SETUP_YASPEM_OUTPUT_DIRECTORY}/modules)
+  list (APPEND CMAKE_MODULE_PATH ${SETUP_YASPEM_OUTPUT_DIRECTORY}/modules)
 endmacro()

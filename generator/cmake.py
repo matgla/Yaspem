@@ -48,7 +48,7 @@ set ({package_name}_SOURCE_DIR "{package_sources}")
 """.format(package_name=package["target"], package_sources=package_source_directory.as_posix()))
 
             if "is_cmake_library" in options:
-                module.write('set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "' + package_source_directory.as_posix() + '")\n')
+                module.write('list (APPEND CMAKE_MODULE_PATH "' + package_source_directory.as_posix() + '")\n')
 
             if "cmake_variables" in options:
                 for var, key in options["cmake_variables"].items():
@@ -67,8 +67,10 @@ if (NOT TARGET {target_name})
                 module.write(
 """
     add_subdirectory ({target} {binary_dir})
-
-""".format(target=package_source_directory, binary_dir="${PROJECT_BINARY_DIR}/yaspem_packages/" + package["target"]))
+    if (NOT TARGET {name})
+        add_library({name} INTERFACE)
+    endif ()
+""".format(target=package_source_directory, binary_dir="${PROJECT_BINARY_DIR}/yaspem_packages/" + package["target"], name=package["target"]))
 
            
 
@@ -78,8 +80,8 @@ endif ()
 """)
             
 
-    def __append_target_property(self, data, property, file):
-        file.write("    target_{property} (\n".format(property=property))
+    def __append_target_property(self, data, property, file, name):
+        file.write("    target_{property} ({name}\n".format(property=property, name=name))
         for scope in data:
             file.write("        " + scope + "\n")
             for e in data[scope]:
@@ -98,7 +100,7 @@ endif ()
                         p = package_sources / p 
                     new_include_directories[scope].append('"' + str(p) + '"')
 
-            self.__append_target_property(new_include_directories, "include_directories", file)
+            self.__append_target_property(new_include_directories, "include_directories", file, package["target"])
 
     def __append_target_sources(self, package, package_sources, file):
         files = []
@@ -130,6 +132,6 @@ endif ()
         supported_props = ["compile_definitions", "link_libraries", "link_directories"]
         for prop in supported_props: 
             if prop in lib:
-                self.__append_target_property(lib[prop], prop, file)
+                self.__append_target_property(lib[prop], prop, file, package["target"])
         
         
