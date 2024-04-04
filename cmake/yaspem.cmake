@@ -28,50 +28,50 @@ function(yaspem_setup_virtualenv source_directory)
   endif()
 
   file(GLOB virtualenv_file_stamp
-       ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp)
+       ${yaspem_binary_dir}/virtualenv_file.stamp)
   if(NOT virtualenv_file_stamp)
     message(
-      STATUS "Configure virtualenv: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv")
+      STATUS "Configure virtualenv: ${yaspem_binary_dir}/yaspem_venv")
     execute_process(
       COMMAND ${virtualenv_exec} -p python3 yaspem_venv
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMAND_ERROR_IS_FATAL ANY)
+      WORKING_DIRECTORY ${yaspem_binary_dir} COMMAND_ERROR_IS_FATAL ANY)
 
-    if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/pip)
-      set(yaspem_pip ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/pip)
-    elseif(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/pip.exe)
-      set(yaspem_pip ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/pip.exe)
+    if(EXISTS ${yaspem_binary_dir}/yaspem_venv/bin/pip)
+      set(yaspem_pip ${yaspem_binary_dir}/yaspem_venv/bin/pip)
+    elseif(EXISTS ${yaspem_binary_dir}/yaspem_venv/Scripts/pip.exe)
+      set(yaspem_pip ${yaspem_binary_dir}/yaspem_venv/Scripts/pip.exe)
     else()
       message(
         FATAL_ERROR
-          "Can't find pip executable under: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv"
+          "Can't find pip executable under: ${yaspem_binary_dir}/yaspem_venv"
       )
     endif()
 
     execute_process(
       COMMAND ${yaspem_pip} install -r ${source_directory}/requirements.txt
-              --upgrade -q -q -q WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+              --upgrade -q -q -q WORKING_DIRECTORY ${yaspem_binary_dir}
                                                    COMMAND_ERROR_IS_FATAL ANY)
 
     execute_process(
-      COMMAND cmake -E touch ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp
-      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMAND_ERROR_IS_FATAL ANY)
+      COMMAND cmake -E touch ${yaspem_binary_dir}/virtualenv_file.stamp
+      WORKING_DIRECTORY ${yaspem_binary_dir} COMMAND_ERROR_IS_FATAL ANY)
 
     file(GLOB virtualenv_file_stamp
-         ${CMAKE_CURRENT_BINARY_DIR}/virtualenv_file.stamp)
+         ${yaspem_binary_dir}/virtualenv_file.stamp)
     message(STATUS "Virtualenv created, stamp file: ${virtualenv_file_stamp}")
   endif()
-  if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3)
+  if(EXISTS ${yaspem_binary_dir}/yaspem_venv/bin/python3)
     set(python_executable
-        ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/bin/python3
+        ${yaspem_binary_dir}/yaspem_venv/bin/python3
         CACHE INTERNAL "" FORCE)
-  elseif(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe)
+  elseif(EXISTS ${yaspem_binary_dir}/yaspem_venv/Scripts/python.exe)
     set(python_executable
-        ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv/Scripts/python.exe
+        ${yaspem_binary_dir}/yaspem_venv/Scripts/python.exe
         CACHE INTERNAL "" FORCE)
   else()
     message(
       FATAL_ERROR
-        "Can't find python 3 executable under: ${CMAKE_CURRENT_BINARY_DIR}/yaspem_venv"
+        "Can't find python 3 executable under: ${yaspem_binary_dir}/yaspem_venv"
     )
   endif()
 
@@ -83,6 +83,7 @@ macro(setup_yaspem)
   set(multipleValueArgs PACKAGE_FILES)
   cmake_parse_arguments(SETUP_YASPEM "" "${oneValueArgs}"
                         "${multipleValueArgs}" ${ARGN})
+                      set(yaspem_binary_dir ${SETUP_YASPEM_OUTPUT_DIRECTORY} CACHE INTERNAL "")
   yaspem_setup_virtualenv(${SETUP_YASPEM_YASPEM_SOURCE})
   if(NOT SETUP_YASPEM_PACKAGE_FILES)
     set(SETUP_YASPEM_PACKAGE_FILES "none")
