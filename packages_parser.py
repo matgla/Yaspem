@@ -24,47 +24,90 @@
 import colorama
 
 import json
+import sys
+
+from pathlib import Path
 
 from cache import LocalCache
 
-from git_fetch import GitFetch
+from fetcher.git import GitFetch
+from generator.cmake import CMakeModuleGenerator
+from distutils.dir_util import copy_tree
 
 class PackagesParser:
-    def __init__(self, cache_directory):
+    def __init__(self, cache_directory, args):
         self.max_name = 0 
         self.line_chars = 0
         self.cache_directory = cache_directory
+        self.force = args.force 
+        self.nosync = args.no_network
+        self.nocompatibility_check = args.no_compatibility_check
+        self.generator = None 
+        if args.use_cmake:
+            self.generator = CMakeModuleGenerator()
 
-    def __print_progress(self, package, color, status, end = False):
+    def __print_progress(self, package, color, status, end = False, success = True):
         end_char = "\r" 
         if end:
             end_char = "\n"
         name_format = "{name:<" + str(self.max_name + 1) + "}"
-        text = "" + colorama.Style.BRIGHT + color + "    -> " + colorama.Style.RESET_ALL \
-            + " " + name_format + " | " + status
+        delimiter = " | "
+        if end:
+            if success:
+                delimiter = color + " ✔  " + colorama.Style.RESET_ALL
+            else:
+                delimiter = colorama.Fore.RED + " ✘  " + colorama.Style.RESET_ALL
+        warning = " "
+        if self.warning:
+            warning = "!"
+        text = "" + colorama.Style.BRIGHT + color + warning + "   -> " + colorama.Style.RESET_ALL \
+            + " " + name_format + delimiter + status
         text = text.format(name=package["target"])
         print(" " * self.line_chars, end="\r") 
         self.line_chars = len(text)
         print(text, end=end_char)
 
-    def __process_dependency(self, package, output_directory):
+    def __copy_package(self, package, output_directory):
+        copy_tree(Path(self.cache_directory) / package["target"], str(output_directory / package["target"]))
+
+    def __process_dependency(self, file, package, output_directory):
+        self.final_msg = "" 
+        self.warning = False
         self.__print_progress(package, colorama.Fore.BLUE, "")
-        if LocalCache.contains(package):
-            self.__print_progress(package, colorama.Fore.BLUE, "already fetched")
+        if LocalCache.contains(file, package):
+            self.final_msg = "already fetched: {}".format(LocalCache.get(file, package)["version"])
         else:
             self.__print_progress(package, colorama.Fore.BLUE, "fetching - [  0%]")
             self.__fetch_package(package, output_directory) 
-        self.__print_progress(package, colorama.Fore.GREEN, "", True)
-        
+       
+            self.__copy_package(package, output_directory / "sources")
+            if self.generator:
+                self.generator.generate(package, output_directory / "sources" / package["target"], output_directory / "modules")
 
+        color = colorama.Fore.GREEN
+        if self.warning:
+            color = colorama.Fore.YELLOW
+        
+        self.__print_progress(package, color, self.final_msg, True)
+       
     def __progress_callback(self, package, status):
+        if status != "":
+            status = " - " + status
         self.__print_progress(package, colorama.Fore.BLUE, status)   
+
+    def __submodule_update_callback(self, package, submodule):
+        self.__print_progress(package, colorama.Fore.BLUE, " submodule: " + submodule)
 
     def __fetch_package(self, package, output_directory):
         if package["type"] == "git":
-            fetch = GitFetch(self.cache_directory, self.__progress_callback)
-            fetch.fetch(package)
-
+            fetch = GitFetch(self.cache_directory, self.__progress_callback, self.__submodule_update_callback, self.force, self.nosync, self.nocompatibility_check)
+            result = fetch.fetch(package)
+            if not result.success:
+                self.__print_progress(package, colorama.Fore.RED, result.message, True, False)
+                sys.exit(-1)
+            
+            self.warning = result.warning
+            self.final_msg = result.message
 
     def __process_file(self, input, output_directory):
         print(colorama.Style.BRIGHT + colorama.Fore.YELLOW + "  -> " + colorama.Style.RESET_ALL + str(input))
@@ -78,7 +121,7 @@ class PackagesParser:
                     self.max_name = len(dep["target"])
     
             for dep in data["dependencies"]:
-                self.__process_dependency(dep, output_directory)
+                self.__process_dependency(str(input), dep, output_directory)
 
     def parse_packages(self, args):
         print("Processing package file:")

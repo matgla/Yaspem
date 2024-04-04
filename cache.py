@@ -32,23 +32,27 @@ class LocalCache:
         if LocalCache.file.exists():
             with open(LocalCache.file, "r") as file:
                 LocalCache.data = json.loads(file.read())
-        if not "timestamps" in LocalCache.data:
-            LocalCache.data["timestamps"] = {} 
     
     @staticmethod 
     def __get_package_entry_name(package):
         return package["target"] + "@" + package["version"] 
     
     @staticmethod
-    def update_cache_entry(package):
+    def update_cache_entry(file_entry, package):
         package_entry = LocalCache.__get_package_entry_name(package)
-        if not package["target"] in LocalCache.data:
-            LocalCache.data[package_entry] = datetime.timestamp(datetime.now())
+        if not file_entry in LocalCache.data: 
+            LocalCache.data[file_entry] = {}
+        print(LocalCache.data) 
+        if not package["target"] in LocalCache.data[file_entry]:
+            LocalCache.data[file_entry][package_entry] = datetime.timestamp(datetime.now())
 
     @staticmethod 
-    def contains(package):
+    def contains(file_entry, package):
         package_entry = LocalCache.__get_package_entry_name(package)
-        if package_entry in LocalCache.data:
+        if not file_entry in LocalCache.data:
+            return False 
+
+        if package_entry in LocalCache.data[file_entry]:
             return True 
         return False 
             

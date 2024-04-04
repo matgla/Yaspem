@@ -21,16 +21,20 @@
 # <https://www.gnu.org/licenses/>.
 #
 
-from git import Repo, RemoteProgress
+from git import Repo, RemoteProgress, GitCommandError
+
+import shutil
 
 from pathlib import Path
+
+from fetch_result import FetchResult
 
 class GitRemoteProgress(RemoteProgress):
     def __init__(self, parser_callback, package):
         super().__init__()
         self.package = package 
         self.callback = parser_callback
-
+        
     def update(self, op_code, cur_count, max_count=None, message=""):
         if int(cur_count) != 0: 
             percent = int(float(cur_count)/float(max_count) * 100)
@@ -54,17 +58,48 @@ class GitRemoteProgress(RemoteProgress):
         
         self.callback(self.package, text)
 
-
-
 class GitFetch:
-    def __init__(self, cache_directory, progress_callback):
+    fetched = {}
+
+    def __init__(self, cache_directory, progress_callback, submodule_update_callback, force, noupdate, nocompatibility_check):
         self.cache_directory = cache_directory
         self.progress_callback = progress_callback
+        self.submodule_update_callback = submodule_update_callback
+        self.force = force
+        self.noupdate = noupdate
+        self.nocompatibility_check = nocompatibility_check
 
     def fetch(self, package):
         package_path = Path(self.cache_directory) / package["target"] 
+       
+        if package["target"] in GitFetch.fetched:
+            cache = GitFetch.fetched[package["target"]]
+            if self.nocompatibility_check:
+                return FetchResult(True, "Already fetched: {}, requested: {}".format(cache["version"], package["version"]), True)
+            if cache["version"] != package["version"]:
+                return FetchResult(False, "Incompatible versions requested: {} != {}".format(package["version"], cache["version"]))
+
+        msg = "" 
+        if self.force and not package["target"] in GitFetch.fetched:
+            if package_path.exists():
+                shutil.rmtree(package_path, ignore_errors = False)
+        
         if not package_path.exists():
             Repo.clone_from(package["link"], package_path, progress=GitRemoteProgress(self.progress_callback, package))    
-   
-    
+            
+        GitFetch.fetched[package["target"]] = {"version": package["version"]}
+        repo = Repo(package_path)  
+        if not self.noupdate:
+            repo.git.fetch()
+        try: 
+            repo.git.checkout(package["version"])
+        except GitCommandError as err:
+            msg = "Can't find version: {}".format(package["version"])
+            return FetchResult(False, msg)
+ 
+        for submodule in repo.submodules:
+            self.submodule_update_callback(package, str(submodule))
+            repo.git.submodule("update", "--init", "--recursive", "--", str(submodule))
+        msg = "Fetched " + package["version"]
 
+        return FetchResult(True, msg)

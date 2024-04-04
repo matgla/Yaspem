@@ -58,8 +58,6 @@ def submodules_update_required(package):
             return package["options"]["update_submodules"]
 
 
-
-
 def main():
     colorama.init()
     print(colorama.Fore.CYAN + "YASPEM - Packages manager" + colorama.Style.RESET_ALL)
@@ -68,90 +66,9 @@ def main():
     LocalCache.set_cache_output_directory(args.output)
     cache_directory = user_cache_dir("yaspem", "Mateusz Stadnik")
     print(cache_directory)
-    parser = PackagesParser(cache_directory) 
+    parser = PackagesParser(cache_directory, args) 
     parser.parse_packages(args)  
 
-
-#     priority = len(Path(os.getcwd()).parts)
-#     print("Priority: ", priority)
-#     if not "priorities" in cache:
-#         cache["priorities"] = {}
-
-#     for input_file in input_files:
-#         with open(input_file, "r") as input_data:
-#             input_json = json.loads(input_data.read())
-#             current_path = os.path.dirname(os.path.abspath(__file__))
-#             if not os.path.isabs(output_directory):
-#                 output_directory = current_path / output_directory
-#             sources_directory = output_directory / "sources"
-#             modules_directory = output_directory / "modules"
-
-#             if not os.path.exists(output_directory):
-#                 print("Creating output directory: ", output_directory)
-#                 os.makedirs(output_directory)
-
-#             if not os.path.exists(sources_directory):
-#                 print("Creating sources directory: ", sources_directory)
-#                 os.makedirs(sources_directory)
-
-#             if not os.path.exists(modules_directory):
-#                 print("Creating modules directory: ", modules_directory)
-#                 os.makedirs(modules_directory)
-
-#             for package in input_json["dependencies"]:
-#                 if not package["target"] in cache["priorities"]:
-#                     cache["priorities"][package["target"]] = priority
-
-#                 elif priority > cache["priorities"][package["target"]]:
-#                     print(
-#                         " > "
-#                         + package["target"]
-#                         + " was fetched by parent packages.json"
-#                     )
-#                     continue
-
-#                 print(" > " + package["target"])
-
-#                 if not "directory" in package:
-#                     directory_suffix = package["target"]
-#                 else:
-#                     directory_suffix = package["directory"]
-#                 package_directory = (
-#                     Path(sources_directory) / directory_suffix
-#                 ).resolve()
-#                 print("directory: ", package_directory, file=sys.stderr)
-#                 if package["type"] == "git":
-#                     if os.path.exists(package_directory):
-#                         repo = Repo(package_directory)
-#                     else:
-#                         git_clone(package["link"], package_directory)
-
-#                     repo = Repo(package_directory)
-
-#                     if submodules_update_required(package):
-#                         print("Submodules update")
-#                         try:
-#                             for submodule in repo.submodules:
-#                                 print(" > " + str(submodule))
-#                                 submodule.update(
-#                                     init=True, progress=GitUpdateProgress()
-#                                 )
-#                         except configparser.NoOptionError:
-#                             print("Can't update submodules, invalid entry")
-#                     if not is_correct_tag(repo, package["version"]):
-#                         print("Checkout version: ", package["version"])
-#                         repo.git.checkout(package["version"])
-
-#                     update_request = os.environ.get("UPDATE_PACKAGES")
-#                     if update_request != None and update_request == "1":
-#                         print("Update package: ", package["target"])
-#                         repo.git.fetch()
-#                         all_branches = repo.git.branch("--all").split()
-#                         if package["version"] in all_branches:
-#                             repo.git.rebase()
-
-#                 else:
-#                     raise "Only git links are supported currently"
 
 #                 if args.use_cmake:
 #                     print("Generate CMake target: ", package["target"])

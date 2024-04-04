@@ -59,6 +59,10 @@ def parse_arguments():
         "-f", "--force", action="store_true", help="Force fetch packages"
     )
 
+    parser.add_argument(
+        "-c", "--no_compatibility_check", action="store_true", help="Skips compatibility check, first requested version is used"
+    )
+
     args, _ = parser.parse_known_args()
 
     args.output = Path(args.output).absolute()
