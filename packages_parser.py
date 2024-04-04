@@ -25,6 +25,7 @@ import colorama
 
 import json
 import sys
+import shutil
 
 from pathlib import Path
 
@@ -35,6 +36,7 @@ from generator.cmake import CMakeModuleGenerator
 from distutils.dir_util import copy_tree
 
 class PackagesParser:
+    fetched = {}
     def __init__(self, cache_directory, args):
         self.max_name = 0 
         self.line_chars = 0
@@ -43,6 +45,8 @@ class PackagesParser:
         self.nosync = args.no_network
         self.nocompatibility_check = args.no_compatibility_check
         self.generator = None 
+        self.no_cache = args.no_cache
+
         if args.use_cmake:
             self.generator = CMakeModuleGenerator()
 
@@ -68,22 +72,47 @@ class PackagesParser:
         print(text, end=end_char)
 
     def __copy_package(self, package, output_directory):
+        target_path = output_directory / package["target"]
+        if target_path.exists():
+            shutil.rmtree(target_path, ignore_errors=False)
         copy_tree(Path(self.cache_directory) / package["target"], str(output_directory / package["target"]))
 
     def __process_dependency(self, file, package, output_directory):
         self.final_msg = "" 
         self.warning = False
         self.__print_progress(package, colorama.Fore.BLUE, "")
-        if LocalCache.contains(file, package):
-            self.final_msg = "already fetched: {}".format(LocalCache.get(file, package)["version"])
+        if LocalCache.contains(package) and not (self.force or self.no_cache):
+            self.final_msg = "Already fetched: {}".format(LocalCache.get(package))
+            PackagesParser.fetched[package["target"]] = {"version": package["version"]}
+
         else:
             self.__print_progress(package, colorama.Fore.BLUE, "fetching - [  0%]")
+            
+            if package["target"] in PackagesParser.fetched:
+                cache = PackagesParser.fetched[package["target"]]
+                color = colorama.Fore.GREEN
+                
+                if cache["version"] == package["version"]:
+                    self.__print_progress(package, color, "Fetched {}".format(package["version"]), True)
+                    return
+                elif self.nocompatibility_check:
+                    self.warning = True 
+                    color = colorama.Fore.YELLOW
+                    self.__print_progress(package, color, "Fetched by parent: {}, requested: {}".format(cache["version"], package["version"]), True, True)
+                    return  
+                else:
+                    color = colorama.Fore.RED
+                    self.__print_progress(package, color, "Incompatible versions requested: {} != {}".format(package["version"], cache["version"]), True)
+                    return 
+
             self.__fetch_package(package, output_directory) 
-       
+            PackagesParser.fetched[package["target"]] = {"version": package["version"]}
+
             self.__copy_package(package, output_directory / "sources")
             if self.generator:
                 self.generator.generate(package, output_directory / "sources" / package["target"], output_directory / "modules")
-
+            
+            LocalCache.update_cache_entry(package)
         color = colorama.Fore.GREEN
         if self.warning:
             color = colorama.Fore.YELLOW
@@ -124,6 +153,6 @@ class PackagesParser:
                 self.__process_dependency(str(input), dep, output_directory)
 
     def parse_packages(self, args):
-        print("Processing package file:")
         for input in args.input:
             self.__process_file(input, args.output)
+        LocalCache.store()

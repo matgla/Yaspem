@@ -63,6 +63,9 @@ def parse_arguments():
         "-c", "--no_compatibility_check", action="store_true", help="Skips compatibility check, first requested version is used"
     )
 
+    parser.add_argument(
+        "-nc", "--no_cache", action="store_true", help="Ignores cache")
+    
     args, _ = parser.parse_known_args()
 
     args.output = Path(args.output).absolute()

@@ -35,27 +35,26 @@ class LocalCache:
     
     @staticmethod 
     def __get_package_entry_name(package):
-        return package["target"] + "@" + package["version"] 
+        return package["target"] 
     
     @staticmethod
-    def update_cache_entry(file_entry, package):
+    def update_cache_entry(package):
         package_entry = LocalCache.__get_package_entry_name(package)
-        if not file_entry in LocalCache.data: 
-            LocalCache.data[file_entry] = {}
-        print(LocalCache.data) 
-        if not package["target"] in LocalCache.data[file_entry]:
-            LocalCache.data[file_entry][package_entry] = datetime.timestamp(datetime.now())
+        if not package["target"] in LocalCache.data:
+            LocalCache.data[package_entry] = package["version"]
 
     @staticmethod 
-    def contains(file_entry, package):
+    def contains(package):
         package_entry = LocalCache.__get_package_entry_name(package)
-        if not file_entry in LocalCache.data:
-            return False 
 
-        if package_entry in LocalCache.data[file_entry]:
-            return True 
+        if package_entry in LocalCache.data:
+            return LocalCache.data[package_entry] == package["version"] 
         return False 
-            
+           
+    @staticmethod 
+    def get(package):
+        return LocalCache.data[package["target"]]
+
     @staticmethod
     def store():
         if LocalCache.data != None and LocalCache.file != None:

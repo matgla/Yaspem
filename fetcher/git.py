@@ -59,8 +59,6 @@ class GitRemoteProgress(RemoteProgress):
         self.callback(self.package, text)
 
 class GitFetch:
-    fetched = {}
-
     def __init__(self, cache_directory, progress_callback, submodule_update_callback, force, noupdate, nocompatibility_check):
         self.cache_directory = cache_directory
         self.progress_callback = progress_callback
@@ -72,22 +70,14 @@ class GitFetch:
     def fetch(self, package):
         package_path = Path(self.cache_directory) / package["target"] 
        
-        if package["target"] in GitFetch.fetched:
-            cache = GitFetch.fetched[package["target"]]
-            if self.nocompatibility_check:
-                return FetchResult(True, "Already fetched: {}, requested: {}".format(cache["version"], package["version"]), True)
-            if cache["version"] != package["version"]:
-                return FetchResult(False, "Incompatible versions requested: {} != {}".format(package["version"], cache["version"]))
-
         msg = "" 
-        if self.force and not package["target"] in GitFetch.fetched:
+        if self.force:
             if package_path.exists():
                 shutil.rmtree(package_path, ignore_errors = False)
         
         if not package_path.exists():
             Repo.clone_from(package["link"], package_path, progress=GitRemoteProgress(self.progress_callback, package))    
             
-        GitFetch.fetched[package["target"]] = {"version": package["version"]}
         repo = Repo(package_path)  
         if not self.noupdate:
             repo.git.fetch()
