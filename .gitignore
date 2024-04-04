@@ -2,3 +2,6 @@ cache.json
 packages/
 test_output
 test_env/
+venv/
+run/
+__pycache__/
