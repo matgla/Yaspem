@@ -67,7 +67,9 @@ if (NOT TARGET {target_name})
                 module.write(
 """
     add_subdirectory ({target} {binary_dir})
-
+    if (NOT ${target})
+        add_library({target} INTERFACE)
+    endif ()
 """.format(target=package_source_directory, binary_dir="${PROJECT_BINARY_DIR}/yaspem_packages/" + package["target"]))
 
            
