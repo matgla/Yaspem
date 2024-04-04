@@ -79,7 +79,7 @@ endif ()
             
 
     def __append_target_property(self, data, property, file, name):
-        file.write("    target_{property} ({name}\n".format(property=property, name={name}))
+        file.write("    target_{property} ({name}\n".format(property=property, name=name))
         for scope in data:
             file.write("        " + scope + "\n")
             for e in data[scope]:
