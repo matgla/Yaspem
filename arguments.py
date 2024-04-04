@@ -68,10 +68,10 @@ def parse_arguments():
     
     args, _ = parser.parse_known_args()
 
-    args.output = Path(args.output).absolute()
+    args.output = Path(args.output.strip()).absolute()
     inputs = [] 
     for input in args.input: 
-        path = Path(input).absolute()
+        path = Path(input.strip()).absolute()
         if not path.exists():
             raise RuntimeError("Packages path not exists: " + str(path))
         inputs.append(path)
