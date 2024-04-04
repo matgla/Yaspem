@@ -48,7 +48,7 @@ set ({package_name}_SOURCE_DIR "{package_sources}")
 """.format(package_name=package["target"], package_sources=package_source_directory.as_posix()))
 
             if "is_cmake_library" in options:
-                module.write('set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "' + package_source_directory.as_posix() + '")\n')
+                module.write('list (APPEND CMAKE_MODULE_PATH "' + package_source_directory.as_posix() + '")\n')
 
             if "cmake_variables" in options:
                 for var, key in options["cmake_variables"].items():
