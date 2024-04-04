@@ -14,7 +14,7 @@ function(yaspem_initialize_packages source_directory output_directory
 
   set(yaspem_args "-o ${output_directory}")
   list(APPEND yaspem_args "--cmake")
-  string(REPLACE ";" "," package_files "${package_files}")
+  string(REPLACE ";" " " package_files "${package_files}")
 
   if(NOT "${package_files}" STREQUAL "")
     list(APPEND yaspem_args "-i ${package_files}")
