@@ -78,8 +78,8 @@ endif ()
 """)
             
 
-    def __append_target_property(self, data, property, file):
-        file.write("    target_{property} (\n".format(property=property))
+    def __append_target_property(self, data, property, file, name):
+        file.write("    target_{property} ({name}\n".format(property=property, name={name}))
         for scope in data:
             file.write("        " + scope + "\n")
             for e in data[scope]:
@@ -98,7 +98,7 @@ endif ()
                         p = package_sources / p 
                     new_include_directories[scope].append('"' + str(p) + '"')
 
-            self.__append_target_property(new_include_directories, "include_directories", file)
+            self.__append_target_property(new_include_directories, "include_directories", file, package["target"])
 
     def __append_target_sources(self, package, package_sources, file):
         files = []
@@ -130,6 +130,6 @@ endif ()
         supported_props = ["compile_definitions", "link_libraries", "link_directories"]
         for prop in supported_props: 
             if prop in lib:
-                self.__append_target_property(lib[prop], prop, file)
+                self.__append_target_property(lib[prop], prop, file, package["target"])
         
         
