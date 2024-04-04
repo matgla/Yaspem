@@ -89,7 +89,7 @@ class GitFetch:
  
         for submodule in repo.submodules:
             self.submodule_update_callback(package, str(submodule))
-            repo.git.submodule("update", "--init", "--recursive", "--", str(submodule))
+            repo.git.submodule("update", "--init", "--", str(submodule.path))
         msg = "Fetched " + package["version"]
 
         return FetchResult(True, msg)
