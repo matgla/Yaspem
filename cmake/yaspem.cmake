@@ -32,6 +32,8 @@ function(yaspem_setup_virtualenv source_directory)
   if(NOT virtualenv_file_stamp)
     message(
       STATUS "Configure virtualenv: ${yaspem_binary_dir}/yaspem_venv")
+
+    file(MAKE_DIRECTORY ${yaspem_binary_dir})
     execute_process(
       COMMAND ${virtualenv_exec} -p python3 yaspem_venv
       WORKING_DIRECTORY ${yaspem_binary_dir} COMMAND_ERROR_IS_FATAL ANY)
