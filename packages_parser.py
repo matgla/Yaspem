@@ -66,16 +66,16 @@ class PackagesParser:
             warning = "!"
         text = "" + colorama.Style.BRIGHT + color + warning + "   -> " + colorama.Style.RESET_ALL \
             + " " + name_format + delimiter + status
-        text = text.format(name=package["target"])
+        text = text.format(name=package["target_name"])
         print(" " * self.line_chars, end="\r") 
         self.line_chars = len(text)
         print(text, end=end_char)
 
     def __copy_package(self, package, output_directory):
-        target_path = output_directory / package["target"]
+        target_path = output_directory / package["target_name"]
         if target_path.exists():
             shutil.rmtree(target_path, ignore_errors=False)
-        copy_tree(Path(self.cache_directory) / package["target"], str(output_directory / package["target"]))
+        copy_tree(Path(self.cache_directory) / package["target_name"], str(output_directory / package["target_name"]))
 
     def __process_dependency(self, file, package, output_directory):
         self.final_msg = "" 
@@ -83,13 +83,13 @@ class PackagesParser:
         self.__print_progress(package, colorama.Fore.BLUE, "")
         if LocalCache.contains(package) and not (self.force or self.no_cache):
             self.final_msg = "Already fetched: {}".format(LocalCache.get(package))
-            PackagesParser.fetched[package["target"]] = {"version": package["version"]}
+            PackagesParser.fetched[package["target_name"]] = {"version": package["version"]}
 
         else:
             self.__print_progress(package, colorama.Fore.BLUE, "fetching - [  0%]")
             
-            if package["target"] in PackagesParser.fetched:
-                cache = PackagesParser.fetched[package["target"]]
+            if package["target_name"] in PackagesParser.fetched:
+                cache = PackagesParser.fetched[package["target_name"]]
                 color = colorama.Fore.GREEN
                 
                 if cache["version"] == package["version"]:
@@ -106,11 +106,11 @@ class PackagesParser:
                     return 
 
             self.__fetch_package(package, output_directory) 
-            PackagesParser.fetched[package["target"]] = {"version": package["version"]}
+            PackagesParser.fetched[package["target_name"]] = {"version": package["version"]}
 
             self.__copy_package(package, output_directory / "sources")
             if self.generator:
-                self.generator.generate(package, output_directory / "sources" / package["target"], output_directory / "modules")
+                self.generator.generate(package, output_directory / "sources" / package["target_name"], output_directory / "modules")
             
             LocalCache.update_cache_entry(package)
         color = colorama.Fore.GREEN
@@ -146,6 +146,12 @@ class PackagesParser:
             self.max_name = 0 
             self.line_chars = 0
             for dep in data["dependencies"]:
+                if not "target_name" in dep:
+                    target_name = dep["link"].split("/")[-1]
+                    target_name = target_name.removesuffix(".git")
+                    dep["target_name"] = target_name
+                if not "target" in dep:
+                    dep["target"] = dep["target_name"]
                 if len(dep["target"]) > self.max_name:
                     self.max_name = len(dep["target"])
     

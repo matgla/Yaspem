@@ -68,7 +68,7 @@ class GitFetch:
         self.nocompatibility_check = nocompatibility_check
 
     def fetch(self, package):
-        package_path = Path(self.cache_directory) / package["target"] 
+        package_path = Path(self.cache_directory) / package["target_name"] 
        
         msg = "" 
         if self.force:

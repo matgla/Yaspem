@@ -70,7 +70,7 @@ if (NOT TARGET {target_name})
     if (NOT TARGET {name})
         add_library({name} INTERFACE)
     endif ()
-""".format(target=package_source_directory, binary_dir="${PROJECT_BINARY_DIR}/yaspem_packages/" + package["target"], name=package["target"]))
+""".format(target=package_source_directory, binary_dir="${PROJECT_BINARY_DIR}/yaspem_packages/" + package["target_name"], name=package["target"]))
 
            
 
