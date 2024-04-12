@@ -83,10 +83,15 @@ class GitFetch:
             repo.git.fetch()
         try: 
             repo.git.checkout(package["version"])
+
         except GitCommandError as err:
             msg = "Can't find version: {}".format(package["version"])
             return FetchResult(False, msg)
- 
+        
+        allBranches = repo.git.branch("--all").split()
+        if package["version"] in allBranches:
+            repo.git.pull()
+  
         for submodule in repo.submodules:
             self.submodule_update_callback(package, str(submodule))
             repo.git.submodule("update", "--init", "--", str(submodule.path))
