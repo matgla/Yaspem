@@ -129,7 +129,7 @@ endif ()
         self.__append_target_sources(package, package_sources, file)
         self.__append_target_include_directories(package, package_sources, file)
 
-        supported_props = ["compile_definitions", "link_libraries", "link_directories"]
+        supported_props = ["compile_definitions", "link_libraries", "link_directories", "compile_options"]
         for prop in supported_props: 
             if prop in lib:
                 self.__append_target_property(lib[prop], prop, file, package["target"])
