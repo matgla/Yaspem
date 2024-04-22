@@ -82,7 +82,14 @@ class PackagesParser:
         self.warning = False
         self.__print_progress(package, colorama.Fore.BLUE, "")
         if LocalCache.contains(package) and not (self.force or self.no_cache):
-            self.final_msg = "Already fetched: {}".format(LocalCache.get(package))
+            if LocalCache.get(package)["version"] != package["version"]: 
+                if self.nocompatibility_check:
+                    self.final_msg = "Already fetched: {}".format(LocalCache.get(package))
+                else:
+                    color = colorama.Fore.RED
+                    self.__print_progress(package, color, "Incompatible versions requested: {} != {}".format(package["version"], LocalCache.get(package)["version"]), True)
+                    return
+
             PackagesParser.fetched[package["target_name"]] = {"version": package["version"]}
 
         else:

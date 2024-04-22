@@ -16,8 +16,16 @@ function(yaspem_initialize_packages source_directory output_directory
     STATUS
       "Command: '${python_executable} ${yaspem_executable} ${yaspem_args}' in ${CMAKE_BINARY_DIR}"
   )
+
+  set (args "")
+  if (DEFINED YASPEM_NO_COMPATIBILITY_CHECK)
+    if (${YASPEM_NO_COMPATIBILITY_CHECK}) 
+      set (args " -c ")
+    endif ()
+  endif ()
+
   execute_process(
-    COMMAND ${python_executable} ${yaspem_executable} -o ${output_directory} -i ${package_files} --cmake
+    COMMAND ${python_executable} ${yaspem_executable} ${args} -o ${output_directory} -i ${package_files}  --cmake
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR} COMMAND_ERROR_IS_FATAL ANY)
 endfunction()
 

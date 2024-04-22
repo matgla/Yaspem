@@ -30,6 +30,7 @@ class LocalCache:
         LocalCache.file = path / "cache.json"
         LocalCache.data = {} 
         if LocalCache.file.exists():
+            print("Cache found:", LocalCache.file) 
             with open(LocalCache.file, "r") as file:
                 LocalCache.data = json.loads(file.read())
     
@@ -48,12 +49,12 @@ class LocalCache:
         package_entry = LocalCache.__get_package_entry_name(package)
 
         if package_entry in LocalCache.data:
-            return LocalCache.data[package_entry] == package["version"] 
+            return True 
         return False 
            
     @staticmethod 
     def get(package):
-        return LocalCache.data[package["target"]]
+        return {"name": package["target"], "version": LocalCache.data[package["target"]]}
 
     @staticmethod
     def store():
